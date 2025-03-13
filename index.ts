@@ -20,16 +20,9 @@ export const bridge = {
   },
 };
 
-export const pipeline: Record<string, Record<string, any>> = {
-  preprocessing: {},
-  ai_function: {},
-  moderator: {},
-  postprocessing: {},
-};
-
 export function preprocessing<T>({ tier }: { tier: number }) {
   return function (target: T, _context: any) {
-    pipeline.preprocessing[target.name] = {
+    MicroApp.__pipeline__.preprocessing[target.name] = {
       tier,
       fn: (obj: any) => (target.call(obj)),
     };
@@ -40,7 +33,7 @@ export function preprocessing<T>({ tier }: { tier: number }) {
 
 export function moderator() {
   return function (target: Function, _context: any) {
-    pipeline.moderator[target.name] = {
+    MicroApp.__pipeline__.moderator[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
     };
 
@@ -63,7 +56,7 @@ export function aiFunction(
   return function (target: any, _context: any) {
     const { description, whenToCall, params } = setup();
 
-    pipeline.ai_function[target.name] = {
+    MicroApp.__pipeline__.ai_function[target.name] = {
       description,
       whenToCall,
       params,
@@ -79,7 +72,7 @@ export function aiFunction(
 
 export function postprocessing({ tier }: { tier: number }) {
   return function (target: Function, _context: any) {
-    pipeline.postprocessing[target.name] = {
+    MicroApp.__pipeline__.postprocessing[target.name] = {
       tier,
       fn: (obj: any) => (target.call(obj)),
     };
@@ -112,7 +105,7 @@ function wrapper<T>(target: T, _context: any) {
           resolve,
         });
 
-        bridge.call({
+        MicroApp.__bridge__.call({
           context_id: id,
           microapp_name: target.prototype.constructor.name,
           function_name: prop,
@@ -224,6 +217,38 @@ export class MicroApp {
   prompt: PromptNode;
   gestor_arquivos: GestorArquivos;
   conversa: Conversa;
+
+  static __pipeline__: Record<string, Record<string, any>> = {
+    preprocessing: {},
+    ai_function: {},
+    moderator: {},
+    postprocessing: {},
+  };
+
+  static __bridge__ = {
+    call: function (params: object) {},
+    receive: function (
+      params: {
+        type: string;
+        context_id: number;
+        value: any;
+        message?: string;
+      },
+    ) {
+      for (const call of calls) {
+        if (call.context_id !== params.context_id) {
+          continue;
+        }
+        if (params.type === "execution_result") {
+          if (params.error_message) {
+            call.reject(params.error_message);
+          } else {
+            call.resolve(params.value);
+          }
+        }
+      }
+    },
+  };
 
   constructor() {
     this.llm = new GPT();
