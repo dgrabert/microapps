@@ -49,7 +49,7 @@ export function moderator() {
 }
 
 type AIParam = {
-  type: "string";
+  type: "string" | "boolean" | "enum";
   description: string;
 };
 
@@ -201,6 +201,20 @@ class GestorArquivos {
   }
 }
 
+@wrapper
+class Conversa {
+  async to_text(
+    params: {
+      backlog?: number;
+      ignore_tools_msgs?: boolean;
+      max_input_user?: number;
+      tag_name?: string;
+    },
+  ) {
+    return "";
+  }
+}
+
 export class MicroApp {
   llm: GPT;
   vars: VarsUser;
@@ -209,6 +223,7 @@ export class MicroApp {
   fluxo: ControladorFluxo;
   prompt: PromptNode;
   gestor_arquivos: GestorArquivos;
+  conversa: Conversa;
 
   constructor() {
     this.llm = new GPT();
@@ -218,5 +233,6 @@ export class MicroApp {
     this.infosUser = new InfosUser();
     this.prompt = new PromptNode();
     this.gestor_arquivos = new GestorArquivos();
+    this.conversa = new Conversa();
   }
 }
