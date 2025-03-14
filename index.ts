@@ -51,10 +51,11 @@ export function aiFunction(
     description: string;
     whenToCall: string;
     params?: Record<string, AIParam>;
+    auto_moderate?: boolean;
   },
 ) {
   return function (target: any, _context: any) {
-    const { description, whenToCall, params } = setup();
+    const { description, whenToCall, params, auto_moderate = true } = setup();
 
     MicroApp.__pipeline__.ai_function[target.name] = {
       description,
@@ -64,6 +65,7 @@ export function aiFunction(
         console.log("executing", target.name, params);
         return target.call(obj, params);
       },
+      auto_moderate
     };
 
     return target;
