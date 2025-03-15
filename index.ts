@@ -56,7 +56,6 @@ export function aiFunction(
 ) {
   return function (target: any, _context: any) {
     const { description, whenToCall, params, auto_moderate = true } = setup();
-
     MicroApp.__pipeline__.ai_function[target.name] = {
       description,
       whenToCall,
@@ -208,7 +207,60 @@ class Conversa {
   ) {
     return "";
   }
+  
+  async ultima_interacao(params: { origem?: string } = {}): Promise<string> {
+    return "";
+  }
+  
+  async append(params: { mensagem: Mensagem }): Promise<void> {
+    return;
+  }
+  
+  async concat(params: { mensagens: Mensagem[] }): Promise<void> {
+    return;
+  }
+  
+  async is_spam(params: { previous_messages?: number } = {}): Promise<boolean> {
+    return false;
+  }
+  
+  async get_last_message(params: { origem?: string } = {}): Promise<Mensagem | null> {
+    return null;
+  }
+  
+  async pega_ultimo_bloco(params: { origem: string }): Promise<Mensagem[]> {
+    return [];
+  }
+  
+  async primeira_msg_do_cliente(): Promise<boolean> {
+    return false;
+  }
+  
+  async ultima_mensagem_origem(params: { origem?: string } = {}): Promise<Mensagem | null> {
+    return null;
+  }
 }
+
+// Definição do tipo Mensagem no formato JSON
+export type Mensagem = {
+  origem: string;
+  conteudo: {
+    texto?: string;
+    midia?: string;
+    audio?: string;
+    tool_calls?: any[];
+  };
+  is_spam?: boolean;
+  tipo?: string;
+  timestamp?: string;
+  modelo?: string;
+  id_user?: string;
+  id_robo?: number;
+  tracking?: any;
+  tool_call_id?: string;
+  message_id?: number;
+  id_agendamento_prospeccao?: number;
+};
 
 export class MicroApp {
   llm: GPT;
