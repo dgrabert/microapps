@@ -144,13 +144,13 @@ class VarsUser {
 
 @wrapper
 class InfosUser {
-  async get({ chave }: { chave: string }): Promise<string | undefined> {
+  async get({ chave }: { chave: string }): Promise<any | undefined> {
     return chave;
   }
   async set(
-    { chave, conteudo }: { chave: string; conteudo: string },
+    { chave, conteudo }: { chave: string; conteudo: any },
   ): Promise<boolean> {
-    return chave === conteudo;
+    return chave !== "";
   }
   async delete({ chave }: { chave: string }): Promise<boolean> {
     return chave !== "";
