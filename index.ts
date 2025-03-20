@@ -218,6 +218,8 @@ export class MicroApp {
   gestor_arquivos: GestorArquivos;
   conversa: Conversa;
 
+  static __version__ = [0, 3, 0]
+
   static __pipeline__: Record<string, Record<string, any>> = {
     preprocessing: {},
     ai_function: {},
