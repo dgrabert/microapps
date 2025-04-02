@@ -268,6 +268,7 @@ export type Mensagem = {
   id_robo?: number;
   tracking?: any;
   tool_call_id?: string;
+  metadados?: any;
   message_id?: number;
   id_agendamento_prospeccao?: number;
 };
