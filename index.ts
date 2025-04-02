@@ -122,8 +122,12 @@ function wrapper<T>(target: T, _context: any) {
 
 @wrapper
 class Interface {
-  async get_nome_interface(): Promise<string> {}
-  async send_template({ nome_template: string, id_user: string, components: any}) {}
+  async get_nome_interface(): Promise<string> {
+    return ""
+  }
+  async send_template(
+    {nome_template, id_user, components}: {nome_template: string; id_user: string; components: any;}
+  ) {}
 }
 
 @wrapper
