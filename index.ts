@@ -121,6 +121,12 @@ function wrapper<T>(target: T, _context: any) {
 }
 
 @wrapper
+class Interface {
+  async get_nome_interface(): Promise<string> {}
+  async send_template({ nome_template: string, id_user: string, components: any}) {}
+}
+
+@wrapper
 class Logger {
   async debug({ msg }) {}
 }
@@ -271,6 +277,7 @@ export class MicroApp {
   prompt: PromptNode;
   gestor_arquivos: GestorArquivos;
   conversa: Conversa;
+  interface: Interface;
 
   static __version__ = [0, 3, 0]
 
@@ -315,5 +322,6 @@ export class MicroApp {
     this.prompt = new PromptNode();
     this.gestor_arquivos = new GestorArquivos();
     this.conversa = new Conversa();
+    this.interface = new Interface();
   }
 }
