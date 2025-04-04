@@ -122,9 +122,7 @@ function wrapper<T>(target: T, _context: any) {
 
 @wrapper
 class Interface {
-  async get_nome_interface(): Promise<string> {
-    return ""
-  }
+  // TODO: Adicionar métodos úteis
 }
 
 @wrapper
