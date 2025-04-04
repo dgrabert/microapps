@@ -125,10 +125,17 @@ class Interface {
   async get_nome_interface(): Promise<string> {
     return ""
   }
+}
+
+@wrapper
+class WhatsappInterface extends Interface {
   async send_template(
     {nome_template, id_user, components}: {nome_template: string; id_user: string; components: any;}
   ) {}
 }
+
+@wrapper
+class LivechatInterface extends Interface { }
 
 @wrapper
 class Logger {
@@ -282,7 +289,8 @@ export class MicroApp {
   prompt: PromptNode;
   gestor_arquivos: GestorArquivos;
   conversa: Conversa;
-  interface: Interface;
+  interface_livechat: LivechatInterface;
+  interface_whatsapp: WhatsappInterface;
 
   static __version__ = [0, 3, 0]
 
@@ -327,6 +335,7 @@ export class MicroApp {
     this.prompt = new PromptNode();
     this.gestor_arquivos = new GestorArquivos();
     this.conversa = new Conversa();
-    this.interface = new Interface();
+    this.interface_livechat = new LivechatInterface();
+    this.interface_whatsapp = new WhatsappInterface();
   }
 }
