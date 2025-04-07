@@ -121,19 +121,29 @@ function wrapper<T>(target: T, _context: any) {
 }
 
 @wrapper
-class Interface {
-  // TODO: Adicionar métodos úteis
+class ControladorInterface {
+  async get_interface_nome(): Promise<"whatsapp"| "site"| "bitrix"| "generico"> {
+    return "generico"
+  }
 }
 
 @wrapper
-class WhatsappInterface extends Interface {
+class WhatsappInterface {
+  async is_active(): Promise<bool> {
+    return false
+  }
+
   async send_template(
     {nome_template, id_user, components}: {nome_template: string; id_user: string; components: any;}
   ) {}
 }
 
 @wrapper
-class LivechatInterface extends Interface { }
+class LivechatInterface {
+  async is_active(): Promise<bool> {
+    return false
+  }
+}
 
 @wrapper
 class Logger {
@@ -289,6 +299,7 @@ export class MicroApp {
   conversa: Conversa;
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
+  controlador_interface: ControladorInterface;
 
   static __version__ = [0, 3, 0]
 
@@ -335,5 +346,6 @@ export class MicroApp {
     this.conversa = new Conversa();
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
+    this.controlador_interface = new ControladorInterface();
   }
 }
