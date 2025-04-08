@@ -46,25 +46,25 @@ type AIParam = {
   description: string;
 };
 
+type AiFunctionSettings = {
+  description: string;
+  whenToCall: string;
+  params?: Record<string, AIParam>;
+  auto_moderate?: boolean;
+};
+
 export function aiFunction(
-  setup: () => {
-    description: string;
-    whenToCall: string;
-    params?: Record<string, AIParam>;
-    auto_moderate?: boolean;
-  },
+  setup: <T extends MicroApp>(
+    instance: T,
+  ) => AiFunctionSettings | Promise<AiFunctionSettings>,
 ) {
   return function (target: any, _context: any) {
-    const { description, whenToCall, params, auto_moderate = true } = setup();
     MicroApp.__pipeline__.ai_function[target.name] = {
-      description,
-      whenToCall,
-      params,
+      setup,
       fn: (obj: any, params: object) => {
         console.log("executing", target.name, params);
         return target.call(obj, params);
       },
-      auto_moderate
     };
 
     return target;
@@ -134,7 +134,11 @@ class WhatsappInterface {
   }
 
   async send_template(
-    {nome_template, id_user, components}: {nome_template: string; id_user: string; components: any;}
+    { nome_template, id_user, components }: {
+      nome_template: string;
+      id_user: string;
+      components: any;
+    },
   ) {}
 }
 
@@ -232,36 +236,40 @@ class Conversa {
   ) {
     return "";
   }
-  
+
   async ultima_interacao(params: { origem?: string } = {}): Promise<string> {
     return "";
   }
-  
+
   async append(params: { mensagem: Mensagem }): Promise<void> {
     return;
   }
-  
+
   async concat(params: { mensagens: Mensagem[] }): Promise<void> {
     return;
   }
-  
+
   async is_spam(params: { previous_messages?: number } = {}): Promise<boolean> {
     return false;
   }
-  
-  async get_last_message(params: { origem?: string } = {}): Promise<Mensagem | null> {
+
+  async get_last_message(
+    params: { origem?: string } = {},
+  ): Promise<Mensagem | null> {
     return null;
   }
-  
+
   async pega_ultimo_bloco(params: { origem: string }): Promise<Mensagem[]> {
     return [];
   }
-  
+
   async primeira_msg_do_cliente(): Promise<boolean> {
     return false;
   }
-  
-  async ultima_mensagem_origem(params: { origem?: string } = {}): Promise<Mensagem | null> {
+
+  async ultima_mensagem_origem(
+    params: { origem?: string } = {},
+  ): Promise<Mensagem | null> {
     return null;
   }
 
@@ -311,7 +319,7 @@ export class MicroApp {
   interface_whatsapp: WhatsappInterface;
   controlador_interface: ControladorInterface;
 
-  static __version__ = [0, 3, 0]
+  static __version__ = [0, 5, 0];
 
   static __pipeline__: Record<string, Record<string, any>> = {
     preprocessing: {},
