@@ -239,6 +239,16 @@ class Conversa {
   async ultima_mensagem_origem(params: { origem?: string } = {}): Promise<Mensagem | null> {
     return null;
   }
+
+  async pega_todas_mensagens(params: { ignore_debug_msgs?: boolean } = { ignore_debug_msgs: true }): Promise<Mensagem[]> {
+    /**
+     * Retorna todas as mensagens da conversa.
+     *
+     * @param ignore_debug_msgs - Se true, ignora mensagens do tipo debug.
+     * @returns Lista com todas as mensagens da conversa.
+     */
+    return [];
+  }
 }
 
 // Definição do tipo Mensagem no formato JSON
