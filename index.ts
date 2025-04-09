@@ -157,6 +157,13 @@ class Logger {
 @wrapper
 class GPT {
   /**
+   * Define o modelo LLM a ser utilizado.
+   * 
+   * @param modelo - Nome do modelo a ser utilizado (ex: "gpt-4o-mini")
+   */
+  async set_modelo({ modelo }: { modelo: string }): Promise<void> {}
+  
+  /**
    * Executa uma chamada ao LLM e retorna a resposta.
    * 
    * @param mensagens - Lista de mensagens para enviar ao LLM
