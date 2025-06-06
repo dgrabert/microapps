@@ -151,7 +151,10 @@ class LivechatInterface {
 
 @wrapper
 class Logger {
-  async debug({ msg }) {}
+  async debug({ msg }: { msg: string }) {}
+  async info({ msg }: { msg: string }) {}
+  async warning({ msg }: { msg: string }) {}
+  async error({ msg }: { msg: string }) {}
 }
 
 @wrapper
