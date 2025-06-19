@@ -122,15 +122,17 @@ function wrapper<T>(target: T, _context: any) {
 
 @wrapper
 class ControladorInterface {
-  async get_interface_nome(): Promise<"whatsapp"| "site"| "bitrix"| "generico"> {
-    return "generico"
+  async get_interface_nome(): Promise<
+    "whatsapp" | "site" | "bitrix" | "generico"
+  > {
+    return "generico";
   }
 }
 
 @wrapper
 class WhatsappInterface {
   async is_active(): Promise<bool> {
-    return false
+    return false;
   }
 
   async send_template(
@@ -145,7 +147,7 @@ class WhatsappInterface {
 @wrapper
 class LivechatInterface {
   async is_active(): Promise<bool> {
-    return false
+    return false;
   }
 }
 
@@ -161,14 +163,14 @@ class Logger {
 class GPT {
   /**
    * Define o modelo LLM a ser utilizado.
-   * 
+   *
    * @param modelo - Nome do modelo a ser utilizado (ex: "gpt-4o-mini")
    */
   async set_modelo({ modelo }: { modelo: string }): Promise<void> {}
-  
+
   /**
    * Executa uma chamada ao LLM e retorna a resposta.
-   * 
+   *
    * @param mensagens - Lista de mensagens para enviar ao LLM
    * @param tools - Lista opcional de ferramentas que o LLM pode usar
    * @param response_format - Especificação opcional do formato da resposta
@@ -188,7 +190,7 @@ class GPT {
 
   /**
    * Realiza um processo de votação usando múltiplas chamadas LLM para determinar consenso.
-   * 
+   *
    * @param num_votos - Número de votos a coletar (deve ser ímpar)
    * @param mensagem_sistema - Mensagem do sistema contendo critérios de votação
    * @param mensagens_a_apurar - Mensagens a serem avaliadas
@@ -196,18 +198,18 @@ class GPT {
    * @param cadeia_pensamentos - Se deve incluir cadeia de pensamentos na resposta
    * @returns Booleano indicando se a votação foi aprovada
    */
-  async votar({ 
-    num_votos, 
-    mensagem_sistema, 
-    mensagens_a_apurar, 
+  async votar({
+    num_votos,
+    mensagem_sistema,
+    mensagens_a_apurar,
     resposta_padrao = false,
-    cadeia_pensamentos = false
-  }: { 
-    num_votos: number, 
-    mensagem_sistema: string, 
-    mensagens_a_apurar: string, 
-    resposta_padrao?: boolean,
-    cadeia_pensamentos?: boolean
+    cadeia_pensamentos = false,
+  }: {
+    num_votos: number;
+    mensagem_sistema: string;
+    mensagens_a_apurar: string;
+    resposta_padrao?: boolean;
+    cadeia_pensamentos?: boolean;
   }): Promise<boolean> {
     return false;
   }
@@ -327,7 +329,9 @@ class Conversa {
     return null;
   }
 
-  async pega_todas_mensagens(params: { ignore_debug_msgs?: boolean } = { ignore_debug_msgs: true }): Promise<Mensagem[]> {
+  async pega_todas_mensagens(
+    params: { ignore_debug_msgs?: boolean } = { ignore_debug_msgs: true },
+  ): Promise<Mensagem[]> {
     /**
      * Retorna todas as mensagens da conversa.
      *
