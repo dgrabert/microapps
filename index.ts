@@ -31,8 +31,8 @@ export function preprocessing<T>({ tier }: { tier: number }) {
   };
 }
 
-export function moderator() {
-  return function (target: Function, _context: any) {
+export function moderator<T>() {
+  return function (target: T, _context: any) {
     MicroApp.__pipeline__.moderator[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
     };
@@ -71,8 +71,8 @@ export function aiFunction(
   };
 }
 
-export function postprocessing({ tier }: { tier: number }) {
-  return function (target: Function, _context: any) {
+export function postprocessing<T>({ tier }: { tier: number }) {
+  return function (target: T, _context: any) {
     MicroApp.__pipeline__.postprocessing[target.name] = {
       tier,
       fn: (obj: any) => (target.call(obj)),
