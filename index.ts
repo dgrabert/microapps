@@ -262,7 +262,7 @@ class ControladorFluxo {
 @wrapper
 class GestorArquivos {
   async upload_arquivo(params: {
-    path_arquivo: string;
+    obj_arquivo: string;
     tipo: "audio" | "imagem" | "documento" | "video";
   }): Promise<string> {
     return String(params);
