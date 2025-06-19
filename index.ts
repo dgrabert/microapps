@@ -174,15 +174,17 @@ class GPT {
    * @param response_format - Especificação opcional do formato da resposta
    * @returns A resposta do LLM, razão de finalização e quaisquer chamadas de ferramentas
    */
-  async run({ 
-    mensagens, 
-    tools = [], 
-    response_format = {} 
-  }: { 
-    mensagens: MensagemLLM[], 
-    tools?: any[], 
-    response_format?: Record<string, any> 
-  }) {}
+  async run({
+    mensagens,
+    tools = [],
+    response_format = {},
+  }: {
+    mensagens: MensagemLLM[];
+    tools?: any[];
+    response_format?: Record<string, any>;
+  }): Promise<[string, string, any]> {
+    return ["", "", null];
+  }
 
   /**
    * Realiza um processo de votação usando múltiplas chamadas LLM para determinar consenso.
