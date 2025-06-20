@@ -1,37 +1,3 @@
-const calls = [];
-
-export const bridge = {
-  call: function (params: object) {},
-  receive: function (
-    params: { type: string; context_id: number; value: any; message?: string },
-  ) {
-    console.log("bridge.receive", params);
-    for (const call of calls) {
-      if (call.context_id !== params.context_id) {
-        continue;
-      }
-      if (params.type === "execution_result") {
-        if (params.error_message) {
-          call.reject(params.error_message);
-        } else {
-          console.log(`params.value`, params.value);
-          // TODO: tratar tambem casos como array de objetos
-          const className = params.value?.__meta__?.name;
-          if (!className) {
-            call.resolve(params.value);
-            return;
-          }
-
-          const obj = eval(`new ${className}()`);
-          Object.assign(obj, params.value);
-          console.log(`instanciou`, obj);
-          call.resolve(obj);
-        }
-      }
-    }
-  },
-};
-
 export function preprocessing<T>({ tier }: { tier: number }) {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.preprocessing[target.name] = {
@@ -112,7 +78,7 @@ function wrapper<T>(target: T, _context: any) {
 
         const id = Math.round(Math.random() * 1_000_000);
 
-        calls.push({
+        MicroApp.__calls__.push({
           context_id: id,
           reject,
           resolve,
@@ -260,39 +226,39 @@ class PromptNode {
     const _ = item;
     return new PromptNode();
   }
-  
+
   async remove_item({ item }: { item: string }): Promise<PromptNode> {
     return new PromptNode();
   }
-  
+
   async clear_items(): Promise<PromptNode> {
     return new PromptNode();
   }
-  
+
   async add_node({ name }: { name: string }): Promise<PromptNode> {
     return new PromptNode();
   }
-  
+
   async node({ name }: { name: string }): Promise<PromptNode> {
     return new PromptNode();
   }
-  
+
   async remove_node({ name }: { name: string }): Promise<PromptNode> {
     return new PromptNode();
   }
-  
+
   async find_node({ name }: { name: string }): Promise<PromptNode | null> {
     return null;
   }
-  
+
   async to_json(): Promise<string> {
     return "";
   }
-  
+
   async from_json({ jsonString }: { jsonString: string }): Promise<void> {
     return;
   }
-  
+
   async to_text(): Promise<string> {
     return "";
   }
@@ -438,6 +404,12 @@ export class MicroApp {
     postprocessing: {},
   };
 
+  static __calls__: {
+    context_id: number;
+    reject: any;
+    resolve: any;
+  }[] = [];
+
   static __bridge__ = {
     call: function (params: object) {},
     receive: function (
@@ -448,7 +420,7 @@ export class MicroApp {
         message?: string;
       },
     ) {
-      for (const call of calls) {
+      for (const call of MicroApp.__calls__) {
         if (call.context_id !== params.context_id) {
           continue;
         }
@@ -456,6 +428,7 @@ export class MicroApp {
           if (params.error_message) {
             call.reject(params.error_message);
           } else {
+            console.log("params.type", params.type);
             call.resolve(params.value);
           }
         }
