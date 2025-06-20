@@ -13,7 +13,18 @@ export const bridge = {
         if (params.error_message) {
           call.reject(params.error_message);
         } else {
-          call.resolve(params.value);
+          console.log(`params.value`, params.value);
+          // TODO: tratar tambem casos como array de objetos
+          const className = params.value?.__meta__?.name;
+          if (!className) {
+            call.resolve(params.value);
+            return;
+          }
+
+          const obj = eval(`new ${className}()`);
+          Object.assign(obj, params.value);
+          console.log(`instanciou`, obj);
+          call.resolve(obj);
         }
       }
     }
