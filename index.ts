@@ -428,8 +428,18 @@ export class MicroApp {
           if (params.error_message) {
             call.reject(params.error_message);
           } else {
-            console.log("params.type", params.type);
-            call.resolve(params.value);
+            // TODO: tratar tambem casos como array de objetos
+            console.log("params", params);
+            const className = params.value?.__meta__?.name;
+            if (!className) {
+              call.resolve(params.value);
+              return;
+            }
+
+            const obj = eval(`new ${className}()`);
+            Object.assign(obj, params.value);
+            console.log(`instanciou`, obj);
+            call.resolve(obj);
           }
         }
       }
