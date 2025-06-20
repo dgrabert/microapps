@@ -89,6 +89,7 @@ function wrapper<T>(target: T, _context: any) {
           microapp_name: target.prototype.constructor.name,
           function_name: prop,
           params: params,
+          meta: target.__meta__,
         });
 
         return promise;
@@ -429,7 +430,6 @@ export class MicroApp {
             call.reject(params.error_message);
           } else {
             // TODO: tratar tambem casos como array de objetos
-            console.log("params", params);
             const className = params.value?.__meta__?.name;
             if (!className) {
               call.resolve(params.value);
@@ -438,7 +438,6 @@ export class MicroApp {
 
             const obj = eval(`new ${className}()`);
             Object.assign(obj, params.value);
-            console.log(`instanciou`, obj);
             call.resolve(obj);
           }
         }
