@@ -5,6 +5,7 @@ export const bridge = {
   receive: function (
     params: { type: string; context_id: number; value: any; message?: string },
   ) {
+    console.log("bridge.receive", params);
     for (const call of calls) {
       if (call.context_id !== params.context_id) {
         continue;
