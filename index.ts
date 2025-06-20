@@ -89,7 +89,7 @@ function wrapper<T>(target: T, _context: any) {
           microapp_name: target.prototype.constructor.name,
           function_name: prop,
           params: params,
-          meta: target.__meta__,
+          meta: this.__meta__,
         });
 
         return promise;
