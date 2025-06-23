@@ -436,9 +436,13 @@ export class MicroApp {
               return;
             }
 
-            const obj = eval(`new ${className}()`);
-            Object.assign(obj, params.value);
-            call.resolve(obj);
+            try {
+              const obj = eval(`new ${className}()`);
+              Object.assign(obj, params.value);
+              call.resolve(obj);
+            } catch (_err) {
+              call.resolve(params.value);
+            }
           }
         }
       }
