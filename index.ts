@@ -354,6 +354,22 @@ class Conversa {
   }
 }
 
+@wrapper
+class Scheduler {
+  async agenda_tarefa({ 
+    microapp_id, 
+    method_name, 
+    parameters, 
+    execution_date 
+  }: { 
+    microapp_id: number,
+    method_name: string,
+    parameters: Record<string, any>,
+    execution_date: string
+  }): Promise<void> {}
+}
+
+
 // Definição do tipo Mensagem no formato JSON
 export type MensagemLLM = {
   role: "assistant" | "user" | "function" | "system" | "tool";
@@ -395,6 +411,7 @@ export class MicroApp {
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
   controlador_interface: ControladorInterface;
+  metodosagendados: Scheduler;
 
   static __version__ = [0, 5, 0];
 
@@ -461,5 +478,6 @@ export class MicroApp {
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
     this.controlador_interface = new ControladorInterface();
+    this.metodosagendados = new Scheduler();
   }
 }
