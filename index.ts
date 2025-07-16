@@ -354,6 +354,16 @@ class Conversa {
   }
 }
 
+export type Tarefas = {
+    id: number,
+    id_microapp: number,
+    metodo: string
+    parameteros: Record<string, string | number | boolean>,
+    criado_em: string
+    data_execucao: string
+    status: string
+}
+
 @wrapper
 class SchedulerMetodos {
   async agenda_tarefa({ 
@@ -367,6 +377,17 @@ class SchedulerMetodos {
     execution_date: string
     microapp_id?: number,
   }): Promise<void> {}
+
+  async cancelar_tarefa_por_id({id}: {id: number}): Promise<void> {}
+  
+  async listar_tarefas({
+    microapp_id
+  }: {
+    microapp_id?: number
+  }): Promise<Tarefas[]> {
+
+    return []
+  }
 
   async cancelar_tarefa({ 
     method_name, 
