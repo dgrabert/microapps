@@ -355,7 +355,7 @@ class Conversa {
 }
 
 @wrapper
-class Scheduler {
+class SchedulerMetodos {
   async agenda_tarefa({ 
     method_name, 
     parameters, 
@@ -411,7 +411,7 @@ export class MicroApp {
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
   controlador_interface: ControladorInterface;
-  metodosagendados: Scheduler;
+  metodosagendados: SchedulerMetodos;
 
   static __version__ = [0, 5, 0];
 
@@ -478,6 +478,6 @@ export class MicroApp {
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
     this.controlador_interface = new ControladorInterface();
-    this.metodosagendados = new Scheduler();
+    this.metodosagendados = new SchedulerMetodos();
   }
 }
