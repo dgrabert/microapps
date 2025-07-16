@@ -357,15 +357,15 @@ class Conversa {
 @wrapper
 class Scheduler {
   async agenda_tarefa({ 
-    microapp_id, 
     method_name, 
     parameters, 
-    execution_date 
+    execution_date,
+    microapp_id, 
   }: { 
-    microapp_id: number,
     method_name: string,
-    parameters: Record<string, any>,
+    parameters: Record<string, string | number | boolean>,
     execution_date: string
+    microapp_id?: number,
   }): Promise<void> {}
 }
 
