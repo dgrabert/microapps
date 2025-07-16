@@ -367,6 +367,14 @@ class SchedulerMetodos {
     execution_date: string
     microapp_id?: number,
   }): Promise<void> {}
+
+  async cancelar_tarefa({ 
+    method_name, 
+    microapp_id, 
+  }: { 
+    method_name: string,
+    microapp_id?: number,
+  }): Promise<void> {}
 }
 
 
