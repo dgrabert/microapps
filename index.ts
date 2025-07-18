@@ -364,6 +364,12 @@ export type Tarefas = {
     status: string
 }
 
+export type RespostaAgendamento =  {
+    success: boolean,
+    data: Record<string, string | number | boolean>,
+    error: string
+}
+
 @wrapper
 class SchedulerMetodos {
   async agenda_tarefa({ 
@@ -376,9 +382,11 @@ class SchedulerMetodos {
     parameters: Record<string, string | number | boolean>,
     execution_date: string
     microapp_id?: number,
-  }): Promise<void> {}
+  }): Promise<RespostaAgendamento> {
+        return {success: false, data: {}, error: "sem dados"}
+    }
 
-  async cancelar_tarefa_por_id({id}: {id: number}): Promise<void> {}
+  async cancelar_tarefa_por_id({id}: {id: string}): Promise<void> {}
   
   async listar_tarefas({
     microapp_id
