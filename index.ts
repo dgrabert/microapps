@@ -61,6 +61,9 @@ export function postprocessing<T>({ tier }: { tier: number }) {
 }
 
 function wrapper<T>(target: T, _context: any) {
+  if (Deno.env.get("MOCK")) {
+    return target;
+  }
   const props = Object.getOwnPropertyNames(target.prototype);
   for (const prop of props) {
     if (prop === "constructor") {
@@ -208,16 +211,21 @@ class VarsUser {
 
 @wrapper
 class InfosUser {
-  async get({ chave }: { chave: string }): Promise<any | undefined> {
-    return chave;
+  _dados: Record<string, any> = {};
+
+  get(p: { chave: string }): Promise<any | undefined> {
+    return Promise.resolve(this._dados[p.chave]);
   }
-  async set(
-    { chave, conteudo }: { chave: string; conteudo: any },
-  ): Promise<boolean> {
-    return chave !== "";
+
+  set(p: { chave: string; conteudo: any }): Promise<boolean> {
+    this._dados[p.chave] = p.conteudo;
+    return Promise.resolve(true);
   }
-  async delete({ chave }: { chave: string }): Promise<boolean> {
-    return chave !== "";
+
+  delete(p: { chave: string }): Promise<boolean> {
+    const existe = p.chave in this._dados;
+    delete this._dados[p.chave];
+    return Promise.resolve(existe);
   }
 }
 
