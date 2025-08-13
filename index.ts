@@ -294,6 +294,10 @@ class GestorArquivos {
 
 @wrapper
 class Conversa {
+  async ids(): Promise<[number, string]> {
+    return await Promise.resolve([0, ""]);
+  }
+
   async to_text(
     params: {
       backlog?: number;
