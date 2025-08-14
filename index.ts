@@ -135,10 +135,18 @@ class LivechatInterface {
 
 @wrapper
 class Logger {
-  async debug({ msg }: { msg: string }) {}
-  async info({ msg }: { msg: string }) {}
-  async warning({ msg }: { msg: string }) {}
-  async error({ msg }: { msg: string }) {}
+  async debug(p: { msg: string }) {
+    console.log(`DEBUG: ${p.msg}`);
+  }
+  async info(p: { msg: string }) {
+    console.log(`INFO: ${p.msg}`);
+  }
+  async warning(p: { msg: string }) {
+    console.log(`WARN: ${p.msg}`);
+  }
+  async error(p: { msg: string }) {
+    console.log(`ERROR: ${p.msg}`);
+  }
 }
 
 @wrapper
@@ -199,13 +207,21 @@ class GPT {
 
 @wrapper
 class VarsUser {
-  async get({ chave }: { chave: string }): Promise<string | undefined> {
-    throw new Error("todo");
+  _dados: Record<string, any> = {};
+
+  get(p: { chave: string }): Promise<any | undefined> {
+    return Promise.resolve(this._dados[p.chave]);
   }
-  async set(
-    { chave, conteudo }: { chave: string; conteudo: string },
-  ): Promise<boolean> {
-    return chave === conteudo;
+
+  set(p: { chave: string; conteudo: any }): Promise<boolean> {
+    this._dados[p.chave] = p.conteudo;
+    return Promise.resolve(true);
+  }
+
+  delete(p: { chave: string }): Promise<boolean> {
+    const existe = p.chave in this._dados;
+    delete this._dados[p.chave];
+    return Promise.resolve(existe);
   }
 }
 
@@ -301,9 +317,20 @@ class GestorArquivos {
 }
 
 @wrapper
-class Conversa {
-  async ids(): Promise<[number, string]> {
-    return await Promise.resolve([0, ""]);
+export class Conversa {
+  idRobo: number = 123;
+  idUsuario: string = "id_usuario";
+  mensagens: Mensagem[] = [
+    {
+      origem: "cliente",
+      conteudo: {
+        texto: "Olá, estou interessado em comprar",
+      },
+    },
+  ];
+
+  ids(): Promise<[number, string]> {
+    return Promise.resolve([this.idRobo, this.idUsuario]);
   }
 
   async to_text(
@@ -317,20 +344,22 @@ class Conversa {
     return "";
   }
 
-  async ultima_interacao(params: { origem?: string } = {}): Promise<string> {
-    return "";
+  ultima_interacao(params: { origem?: string } = {}): Promise<string> {
+    return Promise.resolve("");
   }
 
-  async append(params: { mensagem: Mensagem }): Promise<void> {
-    return;
+  append(params: { mensagem: Mensagem }): Promise<void> {
+    this.mensagens.push(params.mensagem);
+    return Promise.resolve(undefined);
   }
 
-  async concat(params: { mensagens: Mensagem[] }): Promise<void> {
-    return;
+  concat(params: { mensagens: Mensagem[] }): Promise<void> {
+    this.mensagens = this.mensagens.concat(mensagens);
+    return Promise.resolve(undefined);
   }
 
-  async is_spam(params: { previous_messages?: number } = {}): Promise<boolean> {
-    return false;
+  is_spam(params: { previous_messages?: number } = {}): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
   async get_last_message(
@@ -362,7 +391,7 @@ class Conversa {
      * @param ignore_debug_msgs - Se true, ignora mensagens do tipo debug.
      * @returns Lista com todas as mensagens da conversa.
      */
-    return [];
+    return this.mensagens;
   }
 }
 
