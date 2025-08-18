@@ -295,6 +295,7 @@ type Etapa = {
 
 @wrapper
 class ControladorFluxo {
+  async etapa_existe({ nome_etapa }: { nome_etapa: string }): Promise<boolean> {}
   async set_etapa({ nome_etapa }: { nome_etapa: string }) {}
   async get_etapa_atual(): Promise<Etapa> {}
 }
