@@ -2,6 +2,7 @@ import { GestorArquivos } from "./arquivos.ts";
 import { ControladorFluxo } from "./fluxo.ts";
 import { InfosUser } from "./infosUser.ts";
 import {
+  ChatWootInterface,
   ControladorInterface,
   LivechatInterface,
   WhatsappInterface,
@@ -24,6 +25,7 @@ export class MicroApp {
   conversa: Conversa;
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
+  interface_chatwoot: ChatWootInterface;
   controlador_interface: ControladorInterface;
   metodosagendados: SchedulerMetodos;
 
@@ -91,6 +93,7 @@ export class MicroApp {
     this.conversa = new Conversa();
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
+    this.interface_chatwoot = new ChatWootInterface();
     this.controlador_interface = new ControladorInterface();
     this.metodosagendados = new SchedulerMetodos();
   }
