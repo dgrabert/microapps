@@ -8,6 +8,10 @@ export type Etapa = {
 export class ControladorFluxo {
   _etapa: string = "Etapa";
 
+  etapa_existe(p: { nome_etapa: string }): Promise<boolean> {
+    return Promise.resolve(p.nome_etapa === this._etapa);
+  }
+
   set_etapa(p: { nome_etapa: string }): Promise<void> {
     this._etapa = p.nome_etapa;
     return Promise.resolve();
