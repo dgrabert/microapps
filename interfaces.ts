@@ -1,5 +1,25 @@
 import { wrapper } from "./decorators.ts";
 
+export type TemplateComponent = {
+  type: "header" | "body" | "footer" | "buttons";
+  text?: string;
+  parameters: {
+    type: "text" | "image" | "currency" | "date_time";
+    parameter_name?: string;
+    text?: string;
+  }[];
+};
+
+export class TemplateMessage {
+  constructor(
+    public nome: string,
+    public components?: TemplateComponent[],
+    public categoria?: string,
+    public lingua: "en_US" | "pt_BR" | "pt_PT" = "pt_BR",
+    public status: "aprovado" | "recusado" = "aprovado",
+  ) {}
+}
+
 @wrapper
 export class ControladorInterface {
   get_interface_nome(): Promise<
@@ -15,18 +35,38 @@ export class WhatsappInterface {
     return Promise.resolve(false);
   }
 
-  async send_template(
-    { nome_template, id_user, components }: {
-      nome_template: string;
-      id_user: string;
-      components: any;
-    },
-  ) {}
+  send_template(p: {
+    template_or_text: TemplateMessage | string;
+    id_user: string;
+  }): Promise<void> {
+    console.log(
+      `Simulando envio de template via whatsapp: template_or_text=${
+        JSON.stringify(p.template_or_text)
+      } - id_user=${p.id_user}`,
+    );
+    return Promise.resolve();
+  }
 }
 
 @wrapper
 export class LivechatInterface {
   is_active(): Promise<boolean> {
     return Promise.resolve(false);
+  }
+}
+
+@wrapper
+export class ChatWootInterface {
+  send_template(p: {
+    template_or_text: TemplateMessage | string;
+    id_user: string;
+    inbox_id: number | null;
+  }): Promise<void> {
+    console.log(
+      `Simulando envio de template via chatwoot: template_or_text=${
+        JSON.stringify(p.template_or_text)
+      } - id_user=${p.id_user} - inbox_id=${p.inbox_id}`,
+    );
+    return Promise.resolve();
   }
 }
