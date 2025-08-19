@@ -60,7 +60,7 @@ export class ChatWootInterface {
   send_template(p: {
     template_or_text: TemplateMessage | string;
     id_user: string;
-    inbox_id: number | null;
+    inbox_id?: number;
   }): Promise<void> {
     console.log(
       `Simulando envio de template via chatwoot: template_or_text=${
