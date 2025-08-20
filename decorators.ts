@@ -62,6 +62,16 @@ export function postprocessing<T>({ tier }: { tier: number }) {
   };
 }
 
+export function exposed<T extends Function>() {
+  return function (target: T, _context: any) {
+    MicroApp.__pipeline__.exposed[target.name] = {
+      fn: (obj: any, params: object) => (target.call(obj, params)),
+    };
+
+    return target;
+  };
+}
+
 export function wrapper<T>(target: T, _context: any) {
   if (Deno.env.get("MOCK")) {
     return target;

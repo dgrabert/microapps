@@ -1,6 +1,7 @@
 import { MicroApp } from "./base.ts";
 import {
   aiFunction,
+  exposed,
   moderator,
   postprocessing,
   preprocessing,
@@ -12,7 +13,7 @@ import { Mensagem } from "./mensagens.ts";
 import { RespostaAgendamento, Tarefas } from "./scheduler.ts";
 
 // decorators
-export { aiFunction, moderator, postprocessing, preprocessing };
+export { aiFunction, exposed, moderator, postprocessing, preprocessing };
 
 // classe base
 export { MicroApp };

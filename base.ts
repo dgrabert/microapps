@@ -36,6 +36,7 @@ export class MicroApp {
     ai_function: {},
     moderator: {},
     postprocessing: {},
+    exposed: {},
   };
 
   static __calls__: {
