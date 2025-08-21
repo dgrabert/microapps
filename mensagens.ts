@@ -38,15 +38,15 @@ export class Conversa {
     return Promise.resolve([this.idRobo, this.idUsuario]);
   }
 
-  async to_text(
+  to_text(
     params: {
       backlog?: number;
       ignore_tools_msgs?: boolean;
       max_input_user?: number;
       tag_name?: string;
     },
-  ) {
-    return "";
+  ): Promise<string> {
+    return Promise.resolve("");
   }
 
   ultima_interacao(params: { origem?: string } = {}): Promise<string> {

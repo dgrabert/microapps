@@ -1,6 +1,6 @@
 import { MicroApp } from "./base.ts";
 
-export function preprocessing<T>({ tier }: { tier: number }) {
+export function preprocessing<T>({ tier }: { tier: number }): any {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.preprocessing[target.name] = {
       tier,
@@ -11,7 +11,7 @@ export function preprocessing<T>({ tier }: { tier: number }) {
   };
 }
 
-export function moderator<T>() {
+export function moderator<T>(): any {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.moderator[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
@@ -37,7 +37,7 @@ export function aiFunction(
   setup: <T extends MicroApp>(
     instance: T,
   ) => AiFunctionSettings | Promise<AiFunctionSettings>,
-) {
+): any {
   return function (target: any, _context: any) {
     MicroApp.__pipeline__.ai_function[target.name] = {
       setup,
@@ -51,7 +51,7 @@ export function aiFunction(
   };
 }
 
-export function postprocessing<T>({ tier }: { tier: number }) {
+export function postprocessing<T>({ tier }: { tier: number }): any {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.postprocessing[target.name] = {
       tier,
@@ -62,7 +62,7 @@ export function postprocessing<T>({ tier }: { tier: number }) {
   };
 }
 
-export function exposed<T extends Function>() {
+export function exposed<T extends Function>(): any {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.exposed[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
@@ -72,7 +72,7 @@ export function exposed<T extends Function>() {
   };
 }
 
-export function wrapper<T>(target: T, _context: any) {
+export function wrapper<T>(target: T, _context: any): any {
   if (Deno.env.get("MOCK")) {
     return target;
   }

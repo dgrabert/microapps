@@ -54,7 +54,7 @@ export class MicroApp {
         value: any;
         message?: string;
       },
-    ) {
+    ): any {
       for (const call of MicroApp.__calls__) {
         if (call.context_id !== params.context_id) {
           continue;
