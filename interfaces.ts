@@ -36,12 +36,12 @@ export class WhatsappInterface {
   }
 
   send_template(p: {
-    template_or_text: TemplateMessage | string;
+    template: TemplateMessage;
     id_user: string;
   }): Promise<void> {
     console.log(
       `Simulando envio de template via whatsapp: template_or_text=${
-        JSON.stringify(p.template_or_text)
+        JSON.stringify(p.template)
       } - id_user=${p.id_user}`,
     );
     return Promise.resolve();
@@ -58,13 +58,13 @@ export class LivechatInterface {
 @wrapper
 export class ChatWootInterface {
   send_template(p: {
-    template_or_text: TemplateMessage | string;
+    template: TemplateMessage;
     id_user: string;
     inbox_id?: number;
   }): Promise<void> {
     console.log(
       `Simulando envio de template via chatwoot: template_or_text=${
-        JSON.stringify(p.template_or_text)
+        JSON.stringify(p.template)
       } - id_user=${p.id_user} - inbox_id=${p.inbox_id}`,
     );
     return Promise.resolve();
