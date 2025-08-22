@@ -27,6 +27,10 @@ export class ControladorInterface {
   > {
     return Promise.resolve("generico");
   }
+
+  need_template_after_one_day(_args: {id_user: string}): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
 
 @wrapper
