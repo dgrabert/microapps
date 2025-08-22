@@ -68,9 +68,16 @@ export class Conversa {
   }
 
   get_last_message(
-    params: { origem?: string } = {},
+    p: { origem?: string } = {},
   ): Promise<Mensagem | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.mensagens.findLast((m) => {
+        if (p.origem) {
+          return m.origem === p.origem;
+        }
+        return true;
+      }) ?? null,
+    );
   }
 
   pega_ultimo_bloco(params: { origem: string }): Promise<Mensagem[]> {
