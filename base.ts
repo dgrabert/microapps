@@ -49,6 +49,7 @@ export class MicroApp {
     call: function (params: object) {},
     receive: function (
       params: {
+        error_message: string;
         type: string;
         context_id: number;
         value: any;
