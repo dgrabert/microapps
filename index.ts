@@ -6,11 +6,12 @@ import {
   postprocessing,
   preprocessing,
 } from "./decorators.ts";
-import { Etapa } from "./fluxo.ts";
-import { TemplateComponent, TemplateMessage } from "./interfaces.ts";
-import { MensagemLLM } from "./llm.ts";
-import { Mensagem } from "./mensagens.ts";
-import { RespostaAgendamento, Tarefas } from "./scheduler.ts";
+import { TemplateMessage } from "./interfaces.ts";
+import type { Etapa } from "./fluxo.ts";
+import type { TemplateComponent } from "./interfaces.ts";
+import type { MensagemLLM } from "./llm.ts";
+import type { Mensagem } from "./mensagens.ts";
+import type { RespostaAgendamento, Tarefas } from "./scheduler.ts";
 
 // decorators
 export { aiFunction, exposed, moderator, postprocessing, preprocessing };
