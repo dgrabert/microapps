@@ -2,44 +2,76 @@ import { wrapper } from "./decorators.ts";
 
 @wrapper
 export class PromptNode {
-  async add_item({ item }: { item: string | string[] }): Promise<PromptNode> {
-    const _ = item;
-    return new PromptNode();
+  items: string[] = [];
+  children: PromptNode[] = [];
+
+  constructor(public name: string) {}
+
+  add_item({ item }: { item: string | string[] }): Promise<PromptNode> {
+    if (Array.isArray(item)) {
+      this.items = this.items.concat(item);
+    } else {
+      this.items.push(item);
+    }
+    return Promise.resolve(this);
   }
 
-  async remove_item({ item }: { item: string }): Promise<PromptNode> {
-    return new PromptNode();
+  remove_item({ item }: { item: string }): Promise<PromptNode> {
+    this.items = this.items.filter((i) => i !== item);
+    return Promise.resolve(this);
   }
 
-  async clear_items(): Promise<PromptNode> {
-    return new PromptNode();
+  clear_items(): Promise<PromptNode> {
+    this.items = [];
+    return Promise.resolve(this);
   }
 
-  async add_node({ name }: { name: string }): Promise<PromptNode> {
-    return new PromptNode();
+  add_node({ name }: { name: string }): Promise<PromptNode> {
+    const node = new PromptNode(name);
+    this.children.push(node);
+    return Promise.resolve(node);
   }
 
-  async node({ name }: { name: string }): Promise<PromptNode> {
-    return new PromptNode();
+  node({ name }: { name: string }): Promise<PromptNode> {
+    const existingNode = this.children.find((n) => n.name === name);
+    if (!existingNode) {
+      const newNode = new PromptNode(name);
+      this.children.push(newNode);
+      return Promise.resolve(newNode);
+    }
+    return Promise.resolve(existingNode);
   }
 
-  async remove_node({ name }: { name: string }): Promise<PromptNode> {
-    return new PromptNode();
+  remove_node({ name }: { name: string }): Promise<PromptNode> {
+    this.children = this.children.filter((n) => n.name !== name);
+    return Promise.resolve(this);
   }
 
-  async find_node({ name }: { name: string }): Promise<PromptNode | null> {
-    return null;
+  find_node({ name }: { name: string }): Promise<PromptNode | null> {
+    return Promise.resolve(this.children.find((n) => n.name === name) ?? null);
   }
 
-  async to_json(): Promise<string> {
-    return "";
+  to_json(): Promise<string> {
+    return Promise.resolve(JSON.stringify(this));
   }
 
-  async from_json({ jsonString }: { jsonString: string }): Promise<void> {
-    return;
+  from_json({ jsonString }: { jsonString: string }): Promise<void> {
+    return Promise.resolve();
   }
 
-  async to_text(): Promise<string> {
-    return "";
+  to_text(): Promise<string> {
+    const formatNode = (node: PromptNode, depth: number): string => {
+      const indent = "\t".repeat(depth);
+      let result = `${indent}<${node.name}>\n`;
+      for (const item of node.items) {
+        result += `${indent}\t${item}\n`;
+      }
+      for (const child of node.children) {
+        result += formatNode(child, depth + 1);
+      }
+      result += `${indent}</${node.name}>\n`;
+      return result;
+    };
+    return Promise.resolve(formatNode(this, 0));
   }
 }

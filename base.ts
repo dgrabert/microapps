@@ -89,7 +89,7 @@ export class MicroApp {
     this.logger = new Logger();
     this.fluxo = new ControladorFluxo();
     this.infosUser = new InfosUser();
-    this.prompt = new PromptNode();
+    this.prompt = new PromptNode("Mock Root");
     this.gestor_arquivos = new GestorArquivos();
     this.conversa = new Conversa();
     this.interface_livechat = new LivechatInterface();
