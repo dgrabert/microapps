@@ -28,5 +28,6 @@ fi
 
 git tag $tag
 git push origin $tag
+git push
 
 deno publish --no-check
