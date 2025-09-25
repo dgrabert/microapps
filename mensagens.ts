@@ -105,4 +105,8 @@ export class Conversa {
      */
     return Promise.resolve(this.mensagens);
   }
+
+  resumir(p: { acontecimento: string }): Promise<string> {
+    return Promise.resolve(p.acontecimento);
+  }
 }
