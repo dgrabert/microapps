@@ -22,7 +22,15 @@ export function moderator<T>(): any {
 }
 
 type AIParam = {
-  type: "string" | "boolean" | "enum";
+  type:
+    | "string"
+    | "number"
+    | "boolean"
+    | "null"
+    | "empty"
+    | "enum"
+    | "array"
+    | "object";
   description: string;
 };
 
