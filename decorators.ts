@@ -49,9 +49,15 @@ export function aiFunction(
   return function (target: any, _context: any) {
     MicroApp.__pipeline__.ai_function[target.name] = {
       setup,
-      fn: (obj: any, params: object) => {
-        console.log("executing", target.name, params);
-        return target.call(obj, params);
+      fn: async (obj: any, params: object) => {
+        console.log(`Erro ao executar a AI function ${target.name}:\n`, params);
+        try {
+          return await target.call(obj, params);
+        } catch (err) {
+          const eid = Math.round(Math.random()*1_000_000)
+          console.log(`Erro ao executar a AI function ${target.name}:\n${err}\n\n${err?.stack}`)
+          return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`
+        }
       },
     };
 
