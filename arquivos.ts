@@ -1,10 +1,19 @@
 import { wrapper } from "./decorators.ts";
 
+export type TipoArquivo = "audio" | "imagem" | "documento" | "video";
+
 @wrapper
 export class GestorArquivos {
-  upload_arquivo(params: {
+  upload_arquivo_base64(params: {
     obj_arquivo: string;
-    tipo: "audio" | "imagem" | "documento" | "video";
+    tipo: TipoArquivo;
+    data: string;
+    nome_arquivo: string;
+    legenda?: string;
+    metadados?: Record<any, any>;
+    publico?: boolean;
+    mimetype?: string;
+    tamanho_max_imagens?: number;
   }): Promise<string> {
     return Promise.resolve("key");
   }
