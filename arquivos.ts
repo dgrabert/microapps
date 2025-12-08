@@ -5,7 +5,6 @@ export type TipoArquivo = "audio" | "imagem" | "documento" | "video";
 @wrapper
 export class GestorArquivos {
   upload_arquivo_base64(params: {
-    obj_arquivo: string;
     tipo: TipoArquivo;
     data: string;
     nome_arquivo: string;
