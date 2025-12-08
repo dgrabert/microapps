@@ -13,40 +13,39 @@ export type Tarefas = {
 export type RespostaAgendamento = {
   success: boolean;
   data: Record<string, string | number | boolean>;
-  error: string;
+  error?: string;
 };
 
 @wrapper
 export class SchedulerMetodos {
-  async agenda_tarefa({
-    method_name,
-    parameters,
-    execution_date,
-    microapp_id,
-  }: {
+  _methods: Record<string, any> = {};
+
+  agenda_tarefa(p: {
     method_name: string;
-    parameters: Record<string, string | number | boolean>;
     execution_date: string;
     microapp_id?: number;
+    parameters: Record<string, any>;
+    construtor?: Record<string, any>;
   }): Promise<RespostaAgendamento> {
-    return { success: false, data: {}, error: "sem dados" };
+    this._methods[p.method_name] = p;
+    return Promise.resolve({
+      success: true,
+      data: { id: Math.round(Math.random() * 1000) },
+    });
   }
 
-  async cancelar_tarefa_por_id({ id }: { id: string }): Promise<void> {}
-
-  async listar_tarefas({
-    microapp_id,
-  }: {
-    microapp_id?: number;
-  }): Promise<Tarefas[]> {
-    return [];
+  cancelar_tarefa_por_id(_p: { id: string }): Promise<void> {
+    return Promise.resolve();
   }
 
-  async cancelar_tarefa({
-    method_name,
-    microapp_id,
-  }: {
+  listar_tarefas(_p: { microapp_id?: number }): Promise<Tarefas[]> {
+    return Promise.resolve([]);
+  }
+
+  cancelar_tarefa(_p: {
     method_name: string;
     microapp_id?: number;
-  }): Promise<void> {}
+  }): Promise<void> {
+    return Promise.resolve();
+  }
 }
