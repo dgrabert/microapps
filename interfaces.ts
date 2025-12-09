@@ -28,17 +28,16 @@ export class ControladorInterface {
     return Promise.resolve("generico");
   }
 
-  need_template_after_one_day(a: {id_user: string}): Promise<boolean> {
+  need_template_after_one_day(a: { id_user: string }): Promise<boolean> {
     return Promise.resolve(false);
   }
   get_teams(): Promise<Team[]> {
-      return Promise.resolve([])
+    return Promise.resolve([]);
   }
 
-  assign_team(p: {id_user: string, id_team: string}): Promise<boolean
-  > {
-    console.log(`Assinando usuario ${p.id_user} para o time ${p.id_team}`)
-    return Promise.resolve(false)
+  assign_team(p: { id_user: string; id_team: string }): Promise<boolean> {
+    console.log(`Assinando usuario ${p.id_user} para o time ${p.id_team}`);
+    return Promise.resolve(false);
   }
 }
 
@@ -69,13 +68,13 @@ export class LivechatInterface {
 }
 
 export type Team = {
-    id: number | string
-    name: string
-    description: string
-    allow_auto_asign: boolean
-    account_id: number | string
-    is_member: boolean
-}
+  id: number | string;
+  name: string;
+  description: string;
+  allow_auto_asign: boolean;
+  account_id: number | string;
+  is_member: boolean;
+};
 
 @wrapper
 export class ChatWootInterface {
@@ -91,6 +90,13 @@ export class ChatWootInterface {
     );
     return Promise.resolve();
   }
- 
-}
 
+  send_to_human(p: {
+    id_user: string;
+    team_destination?: string;
+    person_destination?: string;
+  }): Promise<Record<string, any> | null> {
+    console.log(`simulando send_to_human: ${JSON.stringify(p)}`);
+    return Promise.resolve({});
+  }
+}
