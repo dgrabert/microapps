@@ -108,6 +108,7 @@ export class ChatWootInterface {
     id_user: string;
     team_destination?: string;
     person_destination?: string;
+    assign_to_person_team?: boolean;
   }): Promise<Record<string, any> | null> {
     console.log(`simulando send_to_human: ${JSON.stringify(p)}`);
     return Promise.resolve({});
