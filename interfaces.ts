@@ -76,6 +76,19 @@ export type Team = {
   is_member: boolean;
 };
 
+export type TeamMember = {
+  id: number;
+  account_id: number;
+  availability_status: string;
+  auto_offline: boolean;
+  confirmed: boolean;
+  email: string;
+  available_name: string;
+  name: string;
+  role: string;
+  thumbnail: string;
+};
+
 @wrapper
 export class ChatWootInterface {
   send_template(p: {
@@ -98,5 +111,15 @@ export class ChatWootInterface {
   }): Promise<Record<string, any> | null> {
     console.log(`simulando send_to_human: ${JSON.stringify(p)}`);
     return Promise.resolve({});
+  }
+
+  get_teams(): Promise<Team[]> {
+    console.log(`simulando get_teams`);
+    return Promise.resolve([]);
+  }
+
+  get_team_members(p: { team_id: number }): Promise<TeamMember[]> {
+    console.log(`simulando get_team_members: ${JSON.stringify(p)}`);
+    return Promise.resolve([]);
   }
 }
