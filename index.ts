@@ -12,7 +12,7 @@ import { TemplateMessage } from "./interfaces.ts";
 import type { MensagemLLM } from "./llm.ts";
 import type { Mensagem } from "./mensagens.ts";
 import { retry } from "./retry.ts";
-import type { RespostaAgendamento, Tarefas } from "./scheduler.ts";
+import type { RespostaAgendamento, Tarefa } from "./scheduler.ts";
 
 // decorators
 export { aiFunction, exposed, moderator, postprocessing, preprocessing };
@@ -30,7 +30,7 @@ export type {
   Mensagem,
   MensagemLLM,
   RespostaAgendamento,
-  Tarefas,
+  Tarefa,
   Team,
   TemplateComponent
 };
