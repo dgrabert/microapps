@@ -123,4 +123,11 @@ export class ChatWootInterface {
     console.log(`simulando get_team_members: ${JSON.stringify(p)}`);
     return Promise.resolve([]);
   }
+
+  unassign_conversation(
+    p: { id_user: string; assignee: boolean; team: boolean },
+  ): Promise<void> {
+    console.log(`simulando unassign_conversation: ${JSON.stringify(p)}`);
+    return Promise.resolve();
+  }
 }

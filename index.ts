@@ -6,9 +6,9 @@ import {
   postprocessing,
   preprocessing,
 } from "./decorators.ts";
-import { TemplateMessage } from "./interfaces.ts";
 import type { Etapa } from "./fluxo.ts";
-import type { TemplateComponent, Team } from "./interfaces.ts";
+import type { Team, TemplateComponent } from "./interfaces.ts";
+import { TemplateMessage } from "./interfaces.ts";
 import type { MensagemLLM } from "./llm.ts";
 import type { Mensagem } from "./mensagens.ts";
 import type { RespostaAgendamento, Tarefas } from "./scheduler.ts";
@@ -22,11 +22,11 @@ export { MicroApp };
 // tipos e classes que o usuario pode usar
 export { TemplateMessage };
 export type {
-  Team,
   Etapa,
   Mensagem,
   MensagemLLM,
   RespostaAgendamento,
   Tarefas,
-  TemplateComponent,
+  Team,
+  TemplateComponent
 };
