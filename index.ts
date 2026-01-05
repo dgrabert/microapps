@@ -11,6 +11,7 @@ import type { Team, TemplateComponent } from "./interfaces.ts";
 import { TemplateMessage } from "./interfaces.ts";
 import type { MensagemLLM } from "./llm.ts";
 import type { Mensagem } from "./mensagens.ts";
+import { retry } from "./retry.ts";
 import type { RespostaAgendamento, Tarefas } from "./scheduler.ts";
 
 // decorators
@@ -18,6 +19,9 @@ export { aiFunction, exposed, moderator, postprocessing, preprocessing };
 
 // classe base
 export { MicroApp };
+
+// utils
+export { retry };
 
 // tipos e classes que o usuario pode usar
 export { TemplateMessage };
