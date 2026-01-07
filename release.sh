@@ -19,15 +19,19 @@ tag=$1
 
 echo "> atualizando deno.json pra versao $tag"
 sed -i "s/\"version\".*/\"version\": \"$tag\",/" deno.json
+
+echo "> atualizando README.md para usar a versao $tag"
+sed -i "s/\"jsr:@virti/microapp-sdk@.*\"/\"jsr:@virti/microapp-sdk@.$tag\"/" README.md
+
 has_changes=$(git status --porcelain)
 
 if [[ $has_changes ]]
 then
-    echo "> commit do deno.json"
+    echo "> commit do deno.json e README.md"
     git add deno.json
     git commit -m "$tag"
 else
-    echo "> deno.json ja esta na versao correta"
+    echo "> deno.json README.md ja estao na versao correta"
 fi
 
 echo "> criando tag $tag no commit atual e subindo pro remote"
