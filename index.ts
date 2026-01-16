@@ -8,7 +8,7 @@ import {
 } from "./decorators.ts";
 import type { Etapa } from "./fluxo.ts";
 import type { Team, TemplateComponent } from "./interfaces.ts";
-import { TemplateMessage } from "./interfaces.ts";
+import { TemplateMessage, Message, MessageContent } from "./interfaces.ts";
 import type { MensagemLLM } from "./llm.ts";
 import type { Mensagem } from "./mensagens.ts";
 import { retry } from "./retry.ts";
@@ -24,7 +24,7 @@ export { MicroApp };
 export { retry };
 
 // tipos e classes que o usuario pode usar
-export { TemplateMessage };
+export { TemplateMessage, Message, MessageContent };
 export type {
   Etapa,
   Mensagem,
