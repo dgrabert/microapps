@@ -9,11 +9,21 @@ export class RoletaChatwoot {
   constructor(
     private microapp: MicroApp,
     private id: string,
-    private atendentes: readonly Atendente[],
+    private atendentes?: readonly Atendente[],
   ) {}
 
   async associar_usuario(): Promise<Atendente | null> {
-    if (this.atendentes.length === 0) {
+    const atendentes = this.atendentes ||
+      await this.microapp.infosRobo.get({
+        chave: `roleta:atendentes:${this.id}`,
+      });
+
+    await this.microapp.infosRobo.set({
+      chave: `roleta:atendentes:${this.id}`,
+      conteudo: atendentes,
+    });
+
+    if (atendentes.length === 0) {
       return null;
     }
 
@@ -22,10 +32,10 @@ export class RoletaChatwoot {
 
     await this.microapp.infosRobo.set({
       chave,
-      conteudo: (atual + 1) % this.atendentes.length,
+      conteudo: (atual + 1) % atendentes.length,
     });
 
-    const atendente = this.atendentes[atual % this.atendentes.length]!;
+    const atendente = atendentes[atual % atendentes.length]!;
 
     const [, id_user] = await this.microapp.conversa.ids();
 
