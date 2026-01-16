@@ -20,8 +20,8 @@ tag=$1
 echo "> atualizando deno.json pra versao $tag"
 sed -i "s/\"version\".*/\"version\": \"$tag\",/" deno.json
 
-echo "> atualizando README.md para usar a versao $tag"
-sed -i "s/\"jsr:@virti/microapp-sdk@.*\"/\"jsr:@virti/microapp-sdk@.$tag\"/" README.md
+# echo "> atualizando README.md para usar a versao $tag"
+# sed -i "s/\"jsr:@virti/microapp-sdk@.*\"/\"jsr:@virti/microapp-sdk@.$tag\"/" README.md
 
 has_changes=$(git status --porcelain)
 
