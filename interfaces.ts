@@ -20,6 +20,26 @@ export class TemplateMessage {
   ) {}
 }
 
+export class MessageContent {
+  constructor(
+    public texto?: string,
+    public midia?: string,
+    public audio?: string,
+    public tool_calls?: object[],
+  ) {};
+}
+
+export class Message {
+  constructor(
+    public conteudo: MessageContent,
+    public origem?: ["robo", "humano", "cliente", "tool"] | null,
+    public tipo?: ["padrao", "debug", "aviso", "template", "instrucao"] | null,
+    public modelo?: string | null,
+    public timestamp?: string | null,
+  ) {};
+}
+
+
 @wrapper
 export class ControladorInterface {
   get_interface_nome(): Promise<
@@ -42,7 +62,22 @@ export class ControladorInterface {
 }
 
 @wrapper
-export class WhatsappInterface {
+class ChatInterface {
+  get_id_user_from_number(num: string): Promise<string> {
+    console.log(`${num}`);
+    return Promise.resolve("");
+  }
+
+  send_message_number(p: {mensagem: Message, phone_number: string}): Promise<void> {
+    console.log(
+      `Simulando envio de mensagem para ${p.phone_number}: ${p.mensagem}`,
+    );
+    return Promise.resolve()
+  }
+}
+
+@wrapper
+export class WhatsappInterface extends ChatInterface {
   is_active(): Promise<boolean> {
     return Promise.resolve(false);
   }
@@ -90,7 +125,7 @@ export type TeamMember = {
 };
 
 @wrapper
-export class ChatWootInterface {
+export class ChatWootInterface extends ChatInterface {
   send_template(p: {
     template: TemplateMessage;
     id_user: string;

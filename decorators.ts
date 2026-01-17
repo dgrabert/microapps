@@ -86,44 +86,50 @@ export function exposed<T extends Function>(): any {
   };
 }
 
-export function wrapper<T>(target: T, _context: any): any {
+export function wrapper<T extends { prototype: any }>(
+  target: T,
+  _context: any,
+): T {
   if (Deno.env.get("MOCK")) {
     return target;
   }
+
   const props = Object.getOwnPropertyNames(target.prototype);
+
   for (const prop of props) {
-    if (prop === "constructor") {
-      continue;
-    }
-    if (typeof target.prototype[prop] === "function") {
-      target.prototype[prop] = function (params) {
-        let resolve;
-        let reject;
+    if (prop === "constructor") continue;
 
-        const promise = new Promise((res, rej) => {
-          resolve = res;
-          reject = rej;
-        });
+    const original = target.prototype[prop];
+    if (typeof original !== "function") continue;
 
-        const id = Math.round(Math.random() * 1_000_000);
+    target.prototype[prop] = function (params: any) {
+      let resolve!: (value: any) => void;
+      let reject!: (reason?: any) => void;
 
-        MicroApp.__calls__.push({
-          context_id: id,
-          reject,
-          resolve,
-        });
+      const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
 
-        MicroApp.__bridge__.call({
-          context_id: id,
-          microapp_name: target.prototype.constructor.name,
-          function_name: prop,
-          params: params,
-          meta: this.__meta__,
-        });
+      const id = Math.round(Math.random() * 1_000_000);
 
-        return promise;
-      };
-    }
+      MicroApp.__calls__.push({
+        context_id: id,
+        reject,
+        resolve,
+      });
+
+      MicroApp.__bridge__.call({
+        context_id: id,
+        microapp_name: this.constructor.name,
+        function_name: prop,
+        params,
+        meta: this.__meta__,
+      });
+
+      return promise;
+    };
   }
+
   return target;
 }
