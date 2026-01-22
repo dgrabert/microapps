@@ -13,4 +13,5 @@ export type { MensagemLLM } from "./llm.ts";
 export type { Mensagem } from "./mensagens.ts";
 export { retry } from "./retry.ts";
 export type { RespostaAgendamento, Tarefa } from "./scheduler.ts";
-export type { RoletaAtendente, RoletaChatwoot } from "./utils/roleta.ts";
+export { RoletaChatwoot } from "./utils/roleta.ts";
+export type { RoletaAtendente } from "./utils/roleta.ts";
