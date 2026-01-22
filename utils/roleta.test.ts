@@ -12,7 +12,11 @@ Deno.test("RoletaChatwoot.associar_usuario", async (t) => {
     ];
 
     const mapp = new TesteRoleta();
-    const roleta = new RoletaChatwoot(mapp, "corretores", corretores);
+    const roleta = new RoletaChatwoot({
+      microapp: mapp,
+      atendentes: corretores,
+      id_roleta: "corretores",
+    });
 
     const a1 = await roleta.associar_usuario();
     assert(a1, "esperava associar o primeiro atendente");
@@ -29,7 +33,11 @@ Deno.test("RoletaChatwoot.associar_usuario", async (t) => {
 
   await t.step("retorna null sem atendentes", async () => {
     const mapp = new TesteRoleta();
-    const roleta = new RoletaChatwoot(mapp, "corretores", []);
+    const roleta = new RoletaChatwoot({
+      microapp: mapp,
+      atendentes: [],
+      id_roleta: "corretores",
+    });
 
     const result = await roleta.associar_usuario();
     assertEquals(result, null);
