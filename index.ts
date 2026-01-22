@@ -6,9 +6,16 @@ export {
   postprocessing,
   preprocessing
 } from "./decorators.ts";
+export type { AIParam, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
 export { TemplateMessage } from "./interfaces.ts";
-export type { Team, TemplateComponent } from "./interfaces.ts";
+export type {
+  AgentInfo,
+  ConversationInfo,
+  ConversationMeta,
+  Team,
+  TemplateComponent
+} from "./interfaces.ts";
 export type { MensagemLLM } from "./llm.ts";
 export type { Mensagem } from "./mensagens.ts";
 export { retry } from "./retry.ts";

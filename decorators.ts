@@ -21,7 +21,7 @@ export function moderator<T>(): any {
   };
 }
 
-type AIParam = {
+export type AIParam = {
   type:
     | "string"
     | "number"
@@ -34,15 +34,15 @@ type AIParam = {
   description: string;
 };
 
-type AiFunctionSettings = {
+export type AiFunctionSettings = {
   description: string;
   whenToCall: string;
   params?: Record<string, AIParam>;
   auto_moderate?: boolean;
 } | null;
 
-export function aiFunction(
-  setup: <T extends MicroApp>(
+export function aiFunction<T extends MicroApp>(
+  setup: (
     instance: T,
   ) => AiFunctionSettings | Promise<AiFunctionSettings>,
 ): any {
