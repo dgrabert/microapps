@@ -39,7 +39,7 @@ type AiFunctionSettings = {
   whenToCall: string;
   params?: Record<string, AIParam>;
   auto_moderate?: boolean;
-};
+} | null;
 
 export function aiFunction(
   setup: <T extends MicroApp>(
@@ -50,13 +50,14 @@ export function aiFunction(
     MicroApp.__pipeline__.ai_function[target.name] = {
       setup,
       fn: async (obj: any, params: object) => {
-        console.log(`Erro ao executar a AI function ${target.name}:\n`, params);
         try {
           return await target.call(obj, params);
         } catch (err) {
-          const eid = Math.round(Math.random()*1_000_000)
-          console.log(`Erro ao executar a AI function ${target.name}:\n${err}\n\n${err?.stack}`)
-          return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`
+          const eid = Math.round(Math.random() * 1_000_000);
+          console.log(
+            `Erro ao executar a AI function ${target.name}:\n${err}\n\n${err?.stack}`,
+          );
+          return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`;
         }
       },
     };
