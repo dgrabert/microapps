@@ -89,8 +89,23 @@ export type TeamMember = {
   thumbnail: string;
 };
 
+export type AgentInfo = {
+  id: number;
+  account_id: number;
+  availability_status: "online" | "offline";
+  auto_offline: boolean;
+  confirmed: boolean;
+  email: string;
+  available_name: string;
+  name: string;
+  role: string;
+  thumbnail: string;
+};
+
 @wrapper
 export class ChatWootInterface {
+  agents: AgentInfo[] = [];
+
   send_template(p: {
     template: TemplateMessage;
     id_user: string;
@@ -129,5 +144,15 @@ export class ChatWootInterface {
   ): Promise<void> {
     console.log(`simulando unassign_conversation: ${JSON.stringify(p)}`);
     return Promise.resolve();
+  }
+
+  is_agent_online(p: { email: string }): Promise<boolean> {
+    return Promise.resolve(
+      Boolean(
+        this.agents.find((a) =>
+          a.email === p.email && a.availability_status === "online"
+        ),
+      ),
+    );
   }
 }
