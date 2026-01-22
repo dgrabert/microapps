@@ -13,14 +13,22 @@ export class RoletaChatwoot {
     private atendentes?: readonly RoletaAtendente[],
   ) {}
 
+  chave_index(): string {
+    return `roleta:idx:${this.id}`;
+  }
+
+  chave_atendentes(): string {
+    return `roleta:atendentes:${this.id}`;
+  }
+
   async associar_usuario(): Promise<RoletaAtendente | null> {
     const atendentes = this.atendentes ||
       await this.microapp.infosRobo.get({
-        chave: `roleta:atendentes:${this.id}`,
+        chave: this.chave_atendentes(),
       });
 
     await this.microapp.infosRobo.set({
-      chave: `roleta:atendentes:${this.id}`,
+      chave: this.chave_atendentes(),
       conteudo: atendentes,
     });
 
@@ -28,11 +36,11 @@ export class RoletaChatwoot {
       return null;
     }
 
-    const chave = `roleta:idx:${this.id}`;
-    const atual = await this.microapp.infosRobo.get({ chave }) || 0;
+    const atual =
+      await this.microapp.infosRobo.get({ chave: this.chave_index() }) || 0;
 
     await this.microapp.infosRobo.set({
-      chave,
+      chave: this.chave_index(),
       conteudo: (atual + 1) % atendentes.length,
     });
 
@@ -50,11 +58,6 @@ export class RoletaChatwoot {
       id_user,
       person_destination: atendente.email,
       assign_to_person_team: true,
-    });
-
-    await this.microapp.infosUser.set({
-      chave: `roleta:atendente:${this.id}`,
-      conteudo: atendente,
     });
 
     return atendente;
