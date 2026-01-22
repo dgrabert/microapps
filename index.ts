@@ -13,6 +13,7 @@ import type { MensagemLLM } from "./llm.ts";
 import type { Mensagem } from "./mensagens.ts";
 import { retry } from "./retry.ts";
 import type { RespostaAgendamento, Tarefa } from "./scheduler.ts";
+import { RoletaChatwoot } from "./utils/roleta.ts";
 
 // decorators
 export { aiFunction, exposed, moderator, postprocessing, preprocessing };
@@ -21,7 +22,7 @@ export { aiFunction, exposed, moderator, postprocessing, preprocessing };
 export { MicroApp };
 
 // utils
-export { retry };
+export { retry, RoletaChatwoot };
 
 // tipos e classes que o usuario pode usar
 export { TemplateMessage };
