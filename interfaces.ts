@@ -102,9 +102,37 @@ export type AgentInfo = {
   thumbnail: string;
 };
 
+export type ConversationMeta = {
+  channel: string;
+  assignee: AgentInfo;
+};
+
+export type ConversationInfo = {
+  meta: ConversationMeta;
+  id: number;
+  account_id: number;
+  uuid: string;
+  agent_last_seen_at: number;
+  assignee_last_seen_at: number;
+  contact_last_seen_at: number;
+  inbox_id: number;
+  labels: string[];
+  muted: boolean;
+  snoozed_until: number | null;
+  status: string;
+  created_at: number;
+  updated_at: number;
+  timestamp: number;
+  first_reply_created_at: number;
+  unread_count: number;
+  last_activity_at: number;
+  waiting_since: number;
+};
+
 @wrapper
 export class ChatWootInterface {
   agents: AgentInfo[] = [];
+  conversation_info!: ConversationInfo;
 
   send_template(p: {
     template: TemplateMessage;
@@ -154,5 +182,9 @@ export class ChatWootInterface {
         ),
       ),
     );
+  }
+
+  get_conversation_details(_p: { id_user: string }): Promise<ConversationInfo> {
+    return Promise.resolve(this.conversation_info);
   }
 }
