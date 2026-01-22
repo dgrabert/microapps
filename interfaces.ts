@@ -104,7 +104,7 @@ export type AgentInfo = {
 
 export type ConversationMeta = {
   channel: string;
-  assignee: AgentInfo;
+  assignee?: AgentInfo;
 };
 
 export type ConversationInfo = {
