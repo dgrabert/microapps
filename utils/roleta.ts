@@ -1,18 +1,19 @@
 import type { MicroApp } from "../base.ts";
 
-export type Atendente = {
+export type RoletaAtendente = {
   nome?: string;
   email: string;
+  telefone?: string;
 };
 
 export class RoletaChatwoot {
   constructor(
     private microapp: MicroApp,
     private id: string,
-    private atendentes?: readonly Atendente[],
+    private atendentes?: readonly RoletaAtendente[],
   ) {}
 
-  async associar_usuario(): Promise<Atendente | null> {
+  async associar_usuario(): Promise<RoletaAtendente | null> {
     const atendentes = this.atendentes ||
       await this.microapp.infosRobo.get({
         chave: `roleta:atendentes:${this.id}`,
