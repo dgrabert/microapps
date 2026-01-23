@@ -137,8 +137,51 @@ export type TeamMember = {
   thumbnail: string;
 };
 
+export type AgentInfo = {
+  id: number;
+  account_id: number;
+  availability_status: "online" | "offline";
+  auto_offline: boolean;
+  confirmed: boolean;
+  email: string;
+  available_name: string;
+  name: string;
+  role: string;
+  thumbnail: string;
+};
+
+export type ConversationMeta = {
+  channel: string;
+  assignee?: AgentInfo;
+};
+
+export type ConversationInfo = {
+  meta: ConversationMeta;
+  id: number;
+  account_id: number;
+  uuid: string;
+  agent_last_seen_at: number;
+  assignee_last_seen_at: number;
+  contact_last_seen_at: number;
+  inbox_id: number;
+  labels: string[];
+  muted: boolean;
+  snoozed_until: number | null;
+  status: string;
+  created_at: number;
+  updated_at: number;
+  timestamp: number;
+  first_reply_created_at: number;
+  unread_count: number;
+  last_activity_at: number;
+  waiting_since: number;
+};
+
 @wrapper
 export class ChatWootInterface extends ChatInterface {
+  agents: AgentInfo[] = [];
+  conversation_info!: ConversationInfo;
+
   send_template(p: {
     template: TemplateMessage;
     id_user: string;
@@ -190,5 +233,19 @@ export class ChatWootInterface extends ChatInterface {
   ): Promise<void> {
     console.log(`simulando unassign_conversation: ${JSON.stringify(p)}`);
     return Promise.resolve();
+  }
+
+  is_agent_online(p: { email: string }): Promise<boolean> {
+    return Promise.resolve(
+      Boolean(
+        this.agents.find((a) =>
+          a.email === p.email && a.availability_status === "online"
+        ),
+      ),
+    );
+  }
+
+  get_conversation_details(_p: { id_user: string }): Promise<ConversationInfo> {
+    return Promise.resolve(this.conversation_info);
   }
 }
