@@ -93,6 +93,19 @@ export class WhatsappInterface extends ChatInterface {
     );
     return Promise.resolve();
   }
+
+  send_template_number(p: {
+    template: TemplateMessage;
+    phone_number: string;
+  }): Promise<void> {
+    console.log(
+      `Simulando envio de template via chatwoot: template_or_text=${
+        JSON.stringify(p.template)
+      } - numero=${p.phone_number}`,
+    );
+    return Promise.resolve();
+  }
+
 }
 
 @wrapper
@@ -135,6 +148,19 @@ export class ChatWootInterface extends ChatInterface {
       `Simulando envio de template via chatwoot: template_or_text=${
         JSON.stringify(p.template)
       } - id_user=${p.id_user} - inbox_id=${p.inbox_id}`,
+    );
+    return Promise.resolve();
+  }
+
+  send_template_number(p: {
+    template: TemplateMessage;
+    phone_number: string;
+    inbox_id?: number;
+  }): Promise<void> {
+    console.log(
+      `Simulando envio de template via chatwoot: template_or_text=${
+        JSON.stringify(p.template)
+      } - id_user=${p.phone_number} - inbox_id=${p.inbox_id}`,
     );
     return Promise.resolve();
   }
