@@ -13,6 +13,7 @@ import { Conversa } from "./mensagens.ts";
 import { PromptNode } from "./prompt.ts";
 import { SchedulerMetodos } from "./scheduler.ts";
 import { VarsUser } from "./varsUser.ts";
+import { FollowUp } from "./follow_up.ts";
 
 export class MicroApp {
   llm: GPT;
@@ -29,6 +30,7 @@ export class MicroApp {
   interface_chatwoot: ChatWootInterface;
   controlador_interface: ControladorInterface;
   metodosagendados: SchedulerMetodos;
+  fup: FollowUp;
 
   static __version__ = [0, 5, 0];
 
@@ -100,5 +102,6 @@ export class MicroApp {
     this.interface_chatwoot = new ChatWootInterface();
     this.controlador_interface = new ControladorInterface();
     this.metodosagendados = new SchedulerMetodos();
+    this.fup = new FollowUp();
   }
 }

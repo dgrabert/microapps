@@ -14,7 +14,10 @@ export type {
   ConversationInfo,
   ConversationMeta,
   Team,
-  TemplateComponent
+  TemplateComponent,
+  TemplateMessage,
+  Message,
+  MessageContent,
 } from "./interfaces.ts";
 export type { MensagemLLM } from "./llm.ts";
 export type { Mensagem } from "./mensagens.ts";
