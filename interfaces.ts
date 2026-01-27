@@ -51,14 +51,6 @@ export class ControladorInterface {
   need_template_after_one_day(a: { id_user: string }): Promise<boolean> {
     return Promise.resolve(false);
   }
-  get_teams(): Promise<Team[]> {
-    return Promise.resolve([]);
-  }
-
-  assign_team(p: { id_user: string; id_team: string }): Promise<boolean> {
-    console.log(`Assinando usuario ${p.id_user} para o time ${p.id_team}`);
-    return Promise.resolve(false);
-  }
 }
 
 @wrapper
@@ -194,7 +186,6 @@ export class ChatWootInterface extends ChatInterface {
     );
     return Promise.resolve();
   }
-
   send_template_number(p: {
     template: TemplateMessage;
     phone_number: string;
