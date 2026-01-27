@@ -204,7 +204,7 @@ export class ChatWootInterface extends ChatInterface {
     team_destination?: string;
     person_destination?: string;
     assign_to_person_team?: boolean;
-  }): Promise<Record<string, any> | null> {
+  }): Promise<Record<string, unknown> | null> {
     console.log(`simulando send_to_human: ${JSON.stringify(p)}`);
     return Promise.resolve({});
   }
