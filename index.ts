@@ -8,7 +8,6 @@ export {
 } from "./decorators.ts";
 export type { AIParam, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
-export { TemplateMessage } from "./interfaces.ts";
 export type {
   AgentInfo,
   ConversationInfo,
