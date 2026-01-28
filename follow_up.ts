@@ -18,7 +18,10 @@ export class FollowUp {
     return Promise.resolve(true);
   }
 
-  agendar_proximo_fup(): Promise<boolean> {
+  agendar_proximo_fup(p?: { forcar_agendar: boolean }): Promise<boolean> {
+    if (p?.forcar_agendar) {
+      console.log(`forçando follow up`);
+    }
     return Promise.resolve(true);
   }
 
