@@ -14,6 +14,8 @@ export type {
   ConversationMeta,
   Team,
   TemplateComponent,
+} from "./interfaces.ts";
+export {
   TemplateMessage,
   Message,
   MessageContent,
