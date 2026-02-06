@@ -21,7 +21,9 @@ export class ControladorFluxo {
     );
   }
 
-  set_etapa(p: { nome_etapa: string }): Promise<void> {
+  set_etapa(
+    p: { nome_etapa: string; gerar_evento_crm?: boolean },
+  ): Promise<void> {
     console.log(`Fluxo: ${this._etapa_atual} -> ${p.nome_etapa}`);
     this._etapa_anterior = this._etapa_atual;
     this._etapa_atual = p.nome_etapa;
@@ -35,7 +37,7 @@ export class ControladorFluxo {
     return Promise.resolve(etapa);
   }
 
-  voltar_etapa(): Promise<void> {
+  voltar_etapa(_p?: { gerar_evento_crm?: boolean }): Promise<void> {
     console.log(`Fluxo: ${this._etapa_atual} -> ${this._etapa_anterior}`);
     this._etapa_atual = this._etapa_anterior;
     return Promise.resolve();
