@@ -209,6 +209,11 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve({});
   }
 
+  update_contact_name(p: { id_user: string; name: string }): Promise<boolean> {
+    console.log(`simulando update_contact_name: ${JSON.stringify(p)}`);
+    return Promise.resolve(true);
+  }
+
   get_teams(): Promise<Team[]> {
     console.log(`simulando get_teams`);
     return Promise.resolve([]);
