@@ -42,4 +42,8 @@ export class ControladorFluxo {
     this._etapa_atual = this._etapa_anterior;
     return Promise.resolve();
   }
+
+  mudou_etapa(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
 }
