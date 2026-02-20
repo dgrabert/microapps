@@ -142,9 +142,15 @@ export type AgentInfo = {
   thumbnail: string;
 };
 
+export type ChatWootAssignee = Partial<AgentInfo> & {
+  id?: number;
+  name?: string;
+  availability_status?: "online" | "offline";
+};
+
 export type ConversationMeta = {
   channel: string;
-  assignee?: AgentInfo;
+  assignee?: ChatWootAssignee;
 };
 
 export type ConversationInfo = {
@@ -173,6 +179,16 @@ export type ConversationInfo = {
 export class ChatWootInterface extends ChatInterface {
   agents: AgentInfo[] = [];
   conversation_info!: ConversationInfo;
+
+  get_atendente(p: { id_user: string }): Promise<ChatWootAssignee | null> {
+    console.log(`simulando get_atendente: ${JSON.stringify(p)}`);
+    return Promise.resolve(null);
+  }
+
+  is_atendente_online(p: { id_user: string }): Promise<boolean> {
+    console.log(`simulando is_atendente_online: ${JSON.stringify(p)}`);
+    return Promise.resolve(false);
+  }
 
   send_template(p: {
     template: TemplateMessage;
@@ -213,6 +229,12 @@ export class ChatWootInterface extends ChatInterface {
     console.log(`simulando update_contact_name: ${JSON.stringify(p)}`);
     return Promise.resolve(true);
   }
+
+  add_label(p: { id_user: string; label: string }): Promise<void> {
+    console.log(`simulando add_label: ${JSON.stringify(p)}`);
+    return Promise.resolve();
+  }
+
 
   get_teams(): Promise<Team[]> {
     console.log(`simulando get_teams`);

@@ -10,6 +10,7 @@ export type { AIParam, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
 export type {
   AgentInfo,
+  ChatWootAssignee,
   ConversationInfo,
   ConversationMeta,
   Team,
