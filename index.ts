@@ -27,3 +27,12 @@ export { retry } from "./retry.ts";
 export type { RespostaAgendamento, Tarefa } from "./scheduler.ts";
 export { RoletaChatwoot } from "./utils/roleta.ts";
 export type { RoletaAtendente } from "./utils/roleta.ts";
+export {
+  BitrixCRM,
+  CRM,
+  CVCRM,
+  EmailCRM,
+  PiperunCRM,
+  RDStationCRM,
+  WebhookCRM,
+} from "./crm.ts";

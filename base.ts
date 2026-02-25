@@ -14,6 +14,7 @@ import { PromptNode } from "./prompt.ts";
 import { SchedulerMetodos } from "./scheduler.ts";
 import { VarsUser } from "./varsUser.ts";
 import { FollowUp } from "./follow_up.ts";
+import { CRM } from "./crm.ts";
 
 export class MicroApp {
   llm: GPT;
@@ -31,6 +32,7 @@ export class MicroApp {
   controlador_interface: ControladorInterface;
   metodosagendados: SchedulerMetodos;
   fup: FollowUp;
+  crm: CRM;
 
   static __version__ = [0, 5, 0];
 
@@ -103,5 +105,6 @@ export class MicroApp {
     this.controlador_interface = new ControladorInterface();
     this.metodosagendados = new SchedulerMetodos();
     this.fup = new FollowUp();
+    this.crm = new CRM();
   }
 }
