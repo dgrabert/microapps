@@ -36,3 +36,4 @@ export {
   RDStationCRM,
   WebhookCRM,
 } from "./crm.ts";
+export type { RDTeam } from "./crm.ts";
