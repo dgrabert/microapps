@@ -1,6 +1,6 @@
 {
     "name": "@virti/microapp-sdk",
-    "version": "0.22.1",
+    "version": "0.22.2",
     "exports": "./index.ts",
     "license": "MIT"
 }
