@@ -4,6 +4,7 @@ export type RoletaAtendente = {
   nome?: string;
   email: string;
   telefone?: string;
+  external_id?: string;
 };
 
 export class RoletaChatwoot {
