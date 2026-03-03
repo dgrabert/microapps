@@ -4,7 +4,8 @@ export {
   exposed,
   moderator,
   postprocessing,
-  preprocessing
+  preprocessing,
+  wrapperMethod
 } from "./decorators.ts";
 export type { AIParam, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
