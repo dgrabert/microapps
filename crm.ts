@@ -1,5 +1,41 @@
 import { wrapper, wrapperMethod } from "./decorators.ts";
 
+export type RDDeal = {
+  id: string;
+  name?: string;
+  recurrence_price?: number;
+  one_time_price?: number;
+  total_price?: number;
+  expected_close_date?: string;
+  rating?: number;
+  status?: "won" | "lost" | "ongoing" | "paused";
+  closed_at?: string;
+  pipeline_id?: string;
+  stage_id?: string;
+  owner_id?: string;
+  source_id?: string;
+  campaign_id?: string;
+  lost_reason_id?: string;
+  organization_id?: string;
+  contact_ids?: string[];
+  custom_fields?: Record<string, string>;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type RDContact = {
+  id: string;
+  name?: string;
+  job_title?: string;
+  phones?: Array<{ phone: string }>;
+  emails?: Array<{ email: string }>;
+  birthday?: string;
+  organization_id?: string;
+  custom_fields?: Record<string, string>;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type RDTeam = {
   id: string;
   name?: string;
@@ -20,21 +56,21 @@ export class RDStationCRM {
   @wrapperMethod
   find_contact(_p: {
     id_user: string;
-  }): Promise<Record<string, any> | null> {
+  }): Promise<RDContact | null> {
     return Promise.resolve(null);
   }
 
   @wrapperMethod
   create_contact(_p: {
     id_user: string;
-  }): Promise<Record<string, any>> {
-    return Promise.resolve({});
+  }): Promise<RDContact> {
+    return Promise.resolve({} as RDContact);
   }
 
   @wrapperMethod
   find_ai_deal(_p: {
     contact_id: string;
-  }): Promise<Record<string, any> | null> {
+  }): Promise<RDDeal | null> {
     return Promise.resolve(null);
   }
 
@@ -45,8 +81,8 @@ export class RDStationCRM {
     owner_id: string;
     pipeline_id?: string;
     stage_id?: string;
-  }): Promise<Record<string, any>> {
-    return Promise.resolve({});
+  }): Promise<RDDeal> {
+    return Promise.resolve({} as RDDeal);
   }
 
   @wrapperMethod
@@ -54,7 +90,7 @@ export class RDStationCRM {
     id_contato: string;
     id_deal: string | null;
     data: Record<string, any>;
-  }): Promise<Record<string, any> | null> {
+  }): Promise<RDDeal | null> {
     return Promise.resolve(null);
   }
 
