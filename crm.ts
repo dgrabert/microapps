@@ -27,6 +27,8 @@ export class RDStationCRM {
     id_user: string;
     contact_id: string;
     owner_id: string;
+    pipeline_id?: string;
+    stage_id?: string;
   }): Promise<Record<string, any>> {
     return Promise.resolve({});
   }
