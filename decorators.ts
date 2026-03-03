@@ -131,7 +131,7 @@ export function exposed<T extends Function>(): any {
 export function wrapperMethod(
   target: any,
   context: ClassMethodDecoratorContext,
-) {
+): any {
   if (Deno.env.get("MOCK")) {
     return target;
   }
