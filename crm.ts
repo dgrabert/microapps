@@ -34,6 +34,7 @@ export type RDContact = {
   custom_fields?: Record<string, string>;
   created_at?: string;
   updated_at?: string;
+  _deal_ia?: RDDeal | null;
 };
 
 export type RDTeam = {
