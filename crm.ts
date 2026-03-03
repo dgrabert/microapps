@@ -1,4 +1,4 @@
-import { wrapper } from "./decorators.ts";
+import { wrapper, wrapperMethod } from "./decorators.ts";
 
 export type RDTeam = {
   id: string;
@@ -6,8 +6,8 @@ export type RDTeam = {
   users?: Array<{ id: string; email?: string; name?: string }>;
 };
 
-@wrapper
 export class RDStationCRM {
+  @wrapperMethod
   api_request(_p: {
     path: string;
     method: string;
@@ -17,13 +17,29 @@ export class RDStationCRM {
     return Promise.resolve();
   }
 
-  find_or_create_contact(_p: {
+  @wrapperMethod
+  find_contact(_p: {
+    id_user: string;
+  }): Promise<Record<string, any> | null> {
+    return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  create_contact(_p: {
     id_user: string;
   }): Promise<Record<string, any>> {
     return Promise.resolve({});
   }
 
-  find_or_create_ai_deal(_p: {
+  @wrapperMethod
+  find_ai_deal(_p: {
+    contact_id: string;
+  }): Promise<Record<string, any> | null> {
+    return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  create_ai_deal(_p: {
     id_user: string;
     contact_id: string;
     owner_id: string;
@@ -33,6 +49,7 @@ export class RDStationCRM {
     return Promise.resolve({});
   }
 
+  @wrapperMethod
   save_deal(_p: {
     id_contato: string;
     id_deal: string | null;
@@ -41,24 +58,28 @@ export class RDStationCRM {
     return Promise.resolve(null);
   }
 
+  @wrapperMethod
   get_pipeline_by_name(_p: {
     name: string;
   }): Promise<{ id: string; name: string } | null> {
     return Promise.resolve(null);
   }
 
+  @wrapperMethod
   get_stages_by_pipeline_id(_p: {
     pipeline_id: string;
   }): Promise<Array<{ id: string; name: string; order?: number }>> {
     return Promise.resolve([]);
   }
 
+  @wrapperMethod
   get_user_by_email(_p: {
     email: string;
   }): Promise<{ id: string; email: string; name?: string } | null> {
     return Promise.resolve(null);
   }
 
+  @wrapperMethod
   get_custom_field_by_name(_p: {
     name: string;
     entity?: string;
@@ -66,6 +87,7 @@ export class RDStationCRM {
     return Promise.resolve(null);
   }
 
+  @wrapperMethod
   list_teams(): Promise<RDTeam[]> {
     return Promise.resolve([]);
   }
