@@ -4,6 +4,49 @@ import { type Atendente, RoletaChatwoot } from "./index.ts";
 
 class TesteRoleta extends MicroApp {}
 
+Deno.test("RoletaChatwoot.girar", async (t) => {
+  await t.step("sorteia e incrementa indice sem atribuir no chatwoot", async () => {
+    const corretores: Atendente[] = [
+      { nome: "A", email: "a@exemplo.com" },
+      { nome: "B", email: "b@exemplo.com" },
+    ];
+
+    const mapp = new TesteRoleta();
+    const roleta = new RoletaChatwoot({
+      microapp: mapp,
+      atendentes: corretores,
+      id_roleta: "girar_test",
+    });
+
+    const a1 = await roleta.girar();
+    assert(a1, "esperava sortear o primeiro atendente");
+    assertEquals(a1, corretores[0]);
+
+    const a2 = await roleta.girar();
+    assert(a2, "esperava sortear o segundo atendente");
+    assertEquals(a2, corretores[1]);
+
+    const a3 = await roleta.girar();
+    assert(a3, "esperava sortear o primeiro novamente");
+    assertEquals(a3, corretores[0]);
+  });
+
+  await t.step("retorna null sem atendentes", async () => {
+    const mapp = new TesteRoleta();
+    const roleta = new RoletaChatwoot({
+      microapp: mapp,
+      atendentes: [],
+      id_roleta: "girar_vazio",
+    });
+
+    const result = await roleta.girar();
+    assertEquals(result, null);
+
+    const idx = await mapp.infosRobo.get({ chave: "roleta:idx:girar_vazio" });
+    assertEquals(idx, undefined);
+  });
+});
+
 Deno.test("RoletaChatwoot.associar_usuario", async (t) => {
   await t.step("associa e incrementa indice", async () => {
     const corretores: Atendente[] = [

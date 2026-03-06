@@ -26,7 +26,11 @@ export class RoletaChatwoot {
     return `roleta:atendentes:${this.options.id_roleta}`;
   }
 
-  async associar_usuario(): Promise<RoletaAtendente | null> {
+  /**
+   * Sorteia o próximo atendente da roleta sem atribuir no Chatwoot.
+   * Persiste a lista de atendentes e incrementa o índice da roleta.
+   */
+  async girar(): Promise<RoletaAtendente | null> {
     const microapp = this.options.microapp;
 
     const atendentes: RoletaAtendente[] = this.options.atendentes ||
@@ -112,6 +116,20 @@ export class RoletaChatwoot {
       return null;
     }
 
+    return atendente;
+  }
+
+  /**
+   * Sorteia o próximo atendente e atribui a conversa no Chatwoot.
+   * Mantido por compatibilidade — usa girar() internamente.
+   */
+  async associar_usuario(): Promise<RoletaAtendente | null> {
+    const atendente = await this.girar();
+    if (!atendente) {
+      return null;
+    }
+
+    const microapp = this.options.microapp;
     const [, id_user] = await microapp.conversa.ids();
 
     await microapp.interface_chatwoot.unassign_conversation({
