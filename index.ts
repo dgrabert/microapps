@@ -1,12 +1,14 @@
 export { MicroApp } from "./base.ts";
 export {
   aiFunction,
+  api,
   exposed,
   moderator,
   postprocessing,
   preprocessing,
-  wrapperMethod
+  wrapperMethod,
 } from "./decorators.ts";
+export { MicroappSession } from "./session.ts";
 export type { AIParam, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
 export type {

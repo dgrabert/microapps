@@ -123,6 +123,29 @@ export function exposed<T extends Function>(): any {
 }
 
 /**
+ * Decorator que registra um método como acessível via endpoint de API externa.
+ * Métodos decorados com `@api()` podem ser invocados pelo endpoint
+ * `POST /executa/<id_conta>/robo/<id_robo>/microapp/<id_microapp>/<metodo>`.
+ *
+ * Exemplo:
+ * ```ts
+ * @api()
+ * async consultarSaldo({ conta }: { conta: string }) {
+ *   return { saldo: 100 };
+ * }
+ * ```
+ */
+export function api<T extends Function>(): any {
+  return function (target: T, _context: any) {
+    MicroApp.__pipeline__.api[target.name] = {
+      fn: (obj: any, params: object) => (target.call(obj, params)),
+    };
+
+    return target;
+  };
+}
+
+/**
  * Decorator de método que intercepta a chamada original e a redireciona pela bridge do MicroApp.
  * Em vez de executar o método diretamente, envia a chamada pelo sistema de bridge (comunicação entre processos)
  * e retorna uma Promise que é resolvida quando a bridge responde.
