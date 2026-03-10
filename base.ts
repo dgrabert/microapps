@@ -15,7 +15,23 @@ import { SchedulerMetodos } from "./scheduler.ts";
 import { VarsUser } from "./varsUser.ts";
 import { FollowUp } from "./follow_up.ts";
 import { CRM } from "./crm.ts";
-import { MicroappSession } from "./session.ts";
+
+/**
+ * Objeto de sessão injetado pelo backend quando um microapp é chamado
+ * via endpoint de API externa.
+ *
+ * Definido aqui (em vez de arquivo separado) para evitar import circular
+ * com decorators.ts → base.ts → session.ts → decorators.ts.
+ *
+ * - `body` e `headers` são propriedades locais (acesso síncrono).
+ * - `set_user()` chama o backend via bridge para vincular a execução a um usuário.
+ */
+export class MicroappSession {
+  body: any = {};
+  headers: Record<string, string> = {};
+
+  async set_user(_params: { id_user: string }): Promise<void> {}
+}
 
 export class MicroApp {
   llm: GPT;
@@ -110,5 +126,35 @@ export class MicroApp {
     this.fup = new FollowUp();
     this.crm = new CRM();
     this.session = new MicroappSession();
+  }
+}
+
+// Aplica wrapper na MicroappSession para que set_user() funcione via bridge.
+// Feito aqui (pós-definição) para evitar import circular com decorators.ts.
+// Replica a lógica de @wrapper de decorators.ts inline.
+if (!Deno.env.get("MOCK")) {
+  const props = Object.getOwnPropertyNames(MicroappSession.prototype);
+  for (const prop of props) {
+    if (prop === "constructor") continue;
+    const original = MicroappSession.prototype[prop];
+    if (typeof original !== "function") continue;
+    MicroappSession.prototype[prop] = function (params: any) {
+      let resolve!: (value: any) => void;
+      let reject!: (reason?: any) => void;
+      const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      const id = Math.round(Math.random() * 1_000_000);
+      MicroApp.__calls__.push({ context_id: id, reject, resolve });
+      MicroApp.__bridge__.call({
+        context_id: id,
+        microapp_name: this.constructor.name,
+        function_name: prop,
+        params,
+        meta: this.__meta__,
+      });
+      return promise;
+    };
   }
 }
