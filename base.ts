@@ -16,6 +16,7 @@ import { VarsUser } from "./varsUser.ts";
 import { FollowUp } from "./follow_up.ts";
 import { CRM } from "./crm.ts";
 import { PortalAPI } from "./portalApi.ts";
+import { MicroAppUtils } from "./utils.ts";
 
 export class MicroApp {
   llm: GPT;
@@ -35,6 +36,7 @@ export class MicroApp {
   fup: FollowUp;
   crm: CRM;
   portalApi: PortalAPI;
+  utils: MicroAppUtils;
 
   static __version__ = [0, 30, 0];
 
@@ -109,5 +111,6 @@ export class MicroApp {
     this.fup = new FollowUp();
     this.crm = new CRM();
     this.portalApi = new PortalAPI();
+    this.utils = new MicroAppUtils();
   }
 }
