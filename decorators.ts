@@ -151,7 +151,15 @@ function _withOptional(param: AIParam): AIParam {
  * }).optional()
  * ```
  */
-export const p = {
+export const p: {
+  string(description: string): AIParam;
+  integer(description: string): AIParam;
+  number(description: string): AIParam;
+  boolean(description: string): AIParam;
+  enum(values: string[], description: string): AIParam;
+  array(items: AIParam, description: string): AIParam;
+  object(config: AIObjectConfig): AIParam;
+} = {
   /** Parâmetro do tipo string. */
   string(description: string): AIParam {
     return _withOptional({ type: "string", __description__: description });
