@@ -3,11 +3,12 @@ export {
   aiFunction,
   exposed,
   moderator,
+  p,
   postprocessing,
   preprocessing,
   wrapperMethod
 } from "./decorators.ts";
-export type { AIParam, AiFunctionSettings } from "./decorators.ts";
+export type { AIParam, AIObjectConfig, AIParamType, AiFunctionSettings } from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
 export type {
   AgentInfo,
@@ -38,3 +39,15 @@ export {
   WebhookCRM,
 } from "./crm.ts";
 export type { RDContact, RDDeal, RDTeam } from "./crm.ts";
+export {
+  PortalAPI,
+  RobosAdapter,
+  CanaisAdapter,
+  ConversasAdapter,
+  CampanhasAdapter,
+  IntegracoesAdapter,
+  FontesDadosAdapter,
+  BancoConhecimentosAdapter,
+  MicroappsAdapter,
+  DashboardAdapter,
+} from "./portalApi.ts";

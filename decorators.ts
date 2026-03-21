@@ -31,33 +31,213 @@ export function moderator<T>(): any {
 }
 
 /**
+ * Tipo base de um parâmetro JSON Schema.
+ */
+export type AIParamType =
+  | "string"
+  | "number"
+  | "integer"
+  | "boolean"
+  | "array"
+  | "object";
+
+/**
  * Um parâmetro de uma AI function.
- * Especifica o tipo do parâmetro (string, number, boolean, etc.) e uma descrição para orientar a IA.
+ *
+ * Para tipos primitivos, use o helper ``p`` (ex: ``p.string("desc")``).
+ * Para sub-objetos, use ``p.object({ __description__, __when_to_call__, properties })``.
+ * Para marcar como opcional, use ``.optional()`` (ex: ``p.integer("ID").optional()``).
+ *
+ * @example
+ * ```ts
+ * params: {
+ *     acao: p.enum(["listar", "criar"], "Ação a executar."),
+ *     listar: p.object({
+ *         __description__: "Lista itens.",
+ *         __when_to_call__: "Quando precisar listar.",
+ *         properties: {
+ *             pagina: p.integer("Página.").optional(),
+ *         },
+ *     }).optional(),
+ * }
+ * ```
  */
 export type AIParam = {
-  type:
-    | "string"
-    | "number"
-    | "boolean"
-    | "null"
-    | "empty"
-    | "enum"
-    | "array"
-    | "object";
-  description: string;
+  type?: AIParamType;
+  __description__?: string;
+  description?: string; // retrocompat SDK < 0.30
+  enum?: string[];
+  items?: AIParam;
+  properties?: Record<string, AIParam>;
+  required?: string[];
+  __when_to_call__?: string;
+  __override__?: boolean;
+  _optional?: boolean;
+  optional?: () => AIParam;
+};
+
+/**
+ * Configurações de sub-objeto para ``p.object()``.
+ */
+export type AIObjectConfig = {
+  __description__?: string;
+  __when_to_call__?: string;
+  __override__?: boolean;
+  properties?: Record<string, AIParam>;
 };
 
 /**
  * Configurações de uma AI function registrada no pipeline.
- * Inclui a descrição da função, quando ela deve ser chamada pela IA (`whenToCall`),
- * os parâmetros esperados e se deve ser auto-moderada. Pode ser `null` para desativar a função dinamicamente.
+ *
+ * Use dunders para metadados:
+ * - ``__description__``: o que o tool faz
+ * - ``__when_to_call__``: quando o LLM deve chamar ({this} = nome da função)
+ * - ``__auto_moderate__``: se a resposta é moderada (default: true)
+ * - ``__background__``: se executa em background (default: false)
+ *
+ * Pode ser ``null`` para desativar a função dinamicamente (hard-disable).
+ *
+ * @example
+ * ```ts
+ * @aiFunction(() => ({
+ *     __description__: "Gerencia robôs.",
+ *     __when_to_call__: "Chame {this} para gerenciar robôs.",
+ *     params: {
+ *         acao: p.enum(["listar", "criar"], "Ação."),
+ *         listar: p.object({ ... }).optional(),
+ *     },
+ * }))
+ * ```
  */
 export type AiFunctionSettings = {
-  description: string;
-  whenToCall: string;
+  __description__: string;
+  __when_to_call__: string;
+  __auto_moderate__?: boolean;
+  __background__?: boolean;
   params?: Record<string, AIParam>;
+
+  // Retrocompat SDK < 0.30 — bridge Python aceita ambos
+  description?: string;
+  whenToCall?: string;
   auto_moderate?: boolean;
+  background?: boolean;
 } | null;
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helper ``p`` — builders de tipo para AI function params
+// ═══════════════════════════════════════════════════════════════════════════
+
+function _withOptional(param: AIParam): AIParam {
+  param.optional = () => ({ ...param, _optional: true, optional: undefined });
+  return param;
+}
+
+/**
+ * Builders de tipo para parâmetros de AI functions.
+ *
+ * @example
+ * ```ts
+ * import { p } from "jsr:@virti/microapp-sdk";
+ *
+ * p.string("Nome do usuário.")
+ * p.integer("Quantidade.").optional()
+ * p.enum(["a", "b"], "Ação.")
+ * p.array(p.string(), "Lista de tags.")
+ * p.object({
+ *     __description__: "Sub-objeto.",
+ *     __when_to_call__: "Quando precisar.",
+ *     properties: { campo: p.string("Desc.") },
+ * }).optional()
+ * ```
+ */
+export const p = {
+  /** Parâmetro do tipo string. */
+  string(description: string): AIParam {
+    return _withOptional({ type: "string", __description__: description });
+  },
+
+  /** Parâmetro do tipo inteiro. */
+  integer(description: string): AIParam {
+    return _withOptional({ type: "integer", __description__: description });
+  },
+
+  /** Parâmetro do tipo numérico (float). */
+  number(description: string): AIParam {
+    return _withOptional({ type: "number", __description__: description });
+  },
+
+  /** Parâmetro do tipo booleano. */
+  boolean(description: string): AIParam {
+    return _withOptional({ type: "boolean", __description__: description });
+  },
+
+  /**
+   * Parâmetro com valores fechados (enum).
+   * Tipo inferido como string — não precisa declarar ``type``.
+   */
+  enum(values: string[], description: string): AIParam {
+    return _withOptional({ enum: values, __description__: description });
+  },
+
+  /**
+   * Parâmetro do tipo array.
+   * @param items - Schema dos itens do array (ex: ``p.string()``).
+   */
+  array(items: AIParam, description: string): AIParam {
+    // Limpa optional() do items se existir
+    const cleanItems = { ...items };
+    delete cleanItems.optional;
+    delete cleanItems._optional;
+    return _withOptional({ type: "array", items: cleanItems, __description__: description });
+  },
+
+  /**
+   * Sub-objeto com metadados (description, when_to_call) e propriedades tipadas.
+   *
+   * @example
+   * ```ts
+   * p.object({
+   *     __description__: "Lista robôs.",
+   *     __when_to_call__: "Quando precisar listar.",
+   *     __override__: false,  // substituição total (default: true = merge)
+   *     properties: {
+   *         id_robo: p.integer("ID.").optional(),
+   *     },
+   * })
+   * ```
+   */
+  object(config: AIObjectConfig): AIParam {
+    const param: AIParam = {
+      type: "object",
+      __description__: config.__description__,
+      __when_to_call__: config.__when_to_call__,
+    };
+    if (config.__override__ !== undefined) {
+      param.__override__ = config.__override__;
+    }
+    if (config.properties) {
+      // Limpa optional() de cada property e calcula required
+      const cleanProps: Record<string, AIParam> = {};
+      const required: string[] = [];
+      for (const [key, val] of Object.entries(config.properties)) {
+        const clean = { ...val };
+        const isOptional = clean._optional === true;
+        delete clean.optional;
+        delete clean._optional;
+        cleanProps[key] = clean;
+        if (!isOptional) {
+          required.push(key);
+        }
+      }
+      param.properties = cleanProps;
+      if (required.length > 0) {
+        param.required = required;
+      }
+    }
+    return _withOptional(param);
+  },
+};
 
 /**
  * Decorator que registra um método como uma AI function no pipeline do MicroApp.
