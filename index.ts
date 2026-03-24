@@ -38,3 +38,4 @@ export {
   WebhookCRM,
 } from "./crm.ts";
 export type { RDContact, RDDeal, RDTeam } from "./crm.ts";
+export { MicroappManager } from "./microapp_manager.ts";

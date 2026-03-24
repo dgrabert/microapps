@@ -15,6 +15,7 @@ import { SchedulerMetodos } from "./scheduler.ts";
 import { VarsUser } from "./varsUser.ts";
 import { FollowUp } from "./follow_up.ts";
 import { CRM } from "./crm.ts";
+import { MicroappManager } from "./microapp_manager.ts";
 
 export class MicroApp {
   llm: GPT;
@@ -33,6 +34,7 @@ export class MicroApp {
   metodosagendados: SchedulerMetodos;
   fup: FollowUp;
   crm: CRM;
+  microapp_manager: MicroappManager;
 
   static __version__ = [0, 5, 0];
 
@@ -106,5 +108,6 @@ export class MicroApp {
     this.metodosagendados = new SchedulerMetodos();
     this.fup = new FollowUp();
     this.crm = new CRM();
+    this.microapp_manager = new MicroappManager();
   }
 }
