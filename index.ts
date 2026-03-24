@@ -52,3 +52,4 @@ export {
   DashboardAdapter,
 } from "./portalApi.ts";
 export { MicroAppUtils } from "./utils.ts";
+export { MicroappManager } from "./microapp_manager.ts";
