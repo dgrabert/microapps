@@ -35,8 +35,8 @@ else
 fi
 
 echo "> criando tag $tag no commit atual e subindo pro remote"
-git tag $tag
-git push origin $tag
+git tag -f $tag
+git push origin $tag --force
 git push
 
 echo "> publicando no JSR"
