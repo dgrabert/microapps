@@ -5,6 +5,7 @@ import {
   ChatWootInterface,
   ControladorInterface,
   LivechatInterface,
+  TelegramInterface,
   WhatsappInterface,
 } from "./interfaces.ts";
 import { GPT } from "./llm.ts";
@@ -32,6 +33,7 @@ export class MicroApp {
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
   interface_chatwoot: ChatWootInterface;
+  interface_telegram: TelegramInterface;
   controlador_interface: ControladorInterface;
   metodosagendados: SchedulerMetodos;
   fup: FollowUp;
@@ -108,6 +110,7 @@ export class MicroApp {
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
     this.interface_chatwoot = new ChatWootInterface();
+    this.interface_telegram = new TelegramInterface();
     this.controlador_interface = new ControladorInterface();
     this.metodosagendados = new SchedulerMetodos();
     this.fup = new FollowUp();

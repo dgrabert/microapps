@@ -20,6 +20,7 @@ export type {
 } from "./interfaces.ts";
 export {
   TemplateMessage,
+  TelegramInterface,
   Message,
   MessageContent,
 } from "./interfaces.ts";

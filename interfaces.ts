@@ -1,4 +1,5 @@
 import { wrapper } from "./decorators.ts";
+import type { Conversa } from "./mensagens.ts";
 
 export type TemplateComponent = {
   type: "header" | "body" | "footer" | "buttons";
@@ -43,7 +44,7 @@ export class Message {
 @wrapper
 export class ControladorInterface {
   get_interface_nome(): Promise<
-    "whatsapp" | "site" | "bitrix" | "generico"
+    "whatsapp" | "site" | "bitrix" | "generico" | "chatwoot" | "telegram"
   > {
     return Promise.resolve("generico");
   }
@@ -58,6 +59,13 @@ class ChatInterface {
   get_id_user_from_number(num: string): Promise<string> {
     console.log(`${num}`);
     return Promise.resolve("");
+  }
+
+  send_message(p: {conversa: Conversa, id_user: string}): Promise<void> {
+    console.log(
+      `Simulando envio de mensagem para ${p.id_user}`,
+    );
+    return Promise.resolve();
   }
 
   send_message_number(p: {mensagem: Message, phone_number: string}): Promise<void> {
@@ -102,6 +110,13 @@ export class WhatsappInterface extends ChatInterface {
 
 @wrapper
 export class LivechatInterface {
+  is_active(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+}
+
+@wrapper
+export class TelegramInterface extends ChatInterface {
   is_active(): Promise<boolean> {
     return Promise.resolve(false);
   }
