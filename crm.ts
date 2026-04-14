@@ -43,6 +43,34 @@ export type RDTeam = {
   users?: Array<{ id: string; email?: string; name?: string }>;
 };
 
+export type CVSituacao = {
+  id?: number;
+  nome?: string;
+};
+
+export type CVCorretor = {
+  id?: number;
+  idcorretor?: number;
+  nome?: string;
+  email?: string;
+};
+
+export type CVEmpreendimento = {
+  id?: number;
+  nome?: string;
+};
+
+export type CVLead = {
+  idlead: number;
+  situacao?: CVSituacao;
+  empreendimento?: Array<CVEmpreendimento | string>;
+  corretor?: CVCorretor;
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  tags?: string[];
+};
+
 export class RDStationCRM {
   @wrapperMethod
   api_request(_p: {
@@ -130,8 +158,32 @@ export class RDStationCRM {
   }
 }
 
-@wrapper
-export class CVCRM {}
+export class CVCRM {
+  @wrapperMethod
+  api_request(_p: {
+    path: string;
+    method: string;
+    data?: Record<string, any> | null;
+    query_params?: Record<string, any>;
+  }): Promise<any> {
+    return Promise.resolve();
+  }
+
+  @wrapperMethod
+  get_lead_by_id(_p: { idlead: string }): Promise<CVLead | null> {
+    return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  get_corretor_by_id(_p: { id_corretor: string }): Promise<CVCorretor | null> {
+    return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  list_situacoes(): Promise<CVSituacao[]> {
+    return Promise.resolve([]);
+  }
+}
 
 @wrapper
 export class EmailCRM {}

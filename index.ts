@@ -39,7 +39,15 @@ export {
   RDStationCRM,
   WebhookCRM,
 } from "./crm.ts";
-export type { RDContact, RDDeal, RDTeam } from "./crm.ts";
+export type {
+  CVCorretor,
+  CVEmpreendimento,
+  CVLead,
+  CVSituacao,
+  RDContact,
+  RDDeal,
+  RDTeam,
+} from "./crm.ts";
 export {
   PortalAPI,
   RobosAdapter,
