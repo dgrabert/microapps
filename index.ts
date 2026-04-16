@@ -42,6 +42,7 @@ export {
 export type {
   CVCorretor,
   CVEmpreendimento,
+  CVEmpreendimentoDetalhe,
   CVInteracao,
   CVLead,
   CVSituacao,

@@ -60,6 +60,13 @@ export type CVEmpreendimento = {
   nome?: string;
 };
 
+export type CVEmpreendimentoDetalhe = {
+  idempreendimento?: string;
+  idempreendimento_int?: string;
+  referencia_externa?: string;
+  nome?: string;
+};
+
 export type CVInteracao = {
   id?: number;
   descricao?: string;
@@ -190,6 +197,13 @@ export class CVCRM {
 
   @wrapperMethod
   get_corretor_by_id(_p: { id_corretor: string }): Promise<CVCorretor | null> {
+    return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  get_empreendimento_by_id(
+    _p: { id_empreendimento: string },
+  ): Promise<CVEmpreendimentoDetalhe | null> {
     return Promise.resolve(null);
   }
 
