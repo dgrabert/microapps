@@ -183,7 +183,7 @@ export class CVCRM {
 
   @wrapperMethod
   consultar_lead(
-    _p: { id_user: string },
+    _p: { id_usuario: string },
   ): Promise<[Record<string, string> | null, CVLead | null]> {
     return Promise.resolve([null, null]);
   }
