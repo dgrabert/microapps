@@ -60,10 +60,17 @@ export type CVEmpreendimento = {
   nome?: string;
 };
 
+export type CVInteracao = {
+  id?: number;
+  descricao?: string;
+  data_cad?: string;
+};
+
 export type CVLead = {
   idlead: number;
   situacao?: CVSituacao;
   empreendimento?: Array<CVEmpreendimento | string>;
+  interacao?: CVInteracao[];
   corretor?: CVCorretor;
   nome?: string;
   email?: string;
@@ -172,6 +179,13 @@ export class CVCRM {
   @wrapperMethod
   get_lead_by_id(_p: { idlead: string }): Promise<CVLead | null> {
     return Promise.resolve(null);
+  }
+
+  @wrapperMethod
+  consultar_lead(
+    _p: { id_user: string },
+  ): Promise<[Record<string, string> | null, CVLead | null]> {
+    return Promise.resolve([null, null]);
   }
 
   @wrapperMethod
