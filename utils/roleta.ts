@@ -59,7 +59,7 @@ export class RoletaChatwoot {
 
     let atendente_elegivel = false;
     let atendente = atendentes[atual % atendentes.length];
-    const max_tentativas = atendentes.length;
+    const max_tentativas = atendentes.length + 1;
 
     for (let i = 0; i < max_tentativas; i++) {
       atendente = atendentes[(atual + i) % atendentes.length];
@@ -110,10 +110,10 @@ export class RoletaChatwoot {
       await microapp.logger.debug({
         msg: {
           "Roleta":
-            `Nenhum atendente elegível após ${max_tentativas} tentativas.`,
+            `Nenhum atendente elegível após ${max_tentativas} tentativas. Elegendo o próximo da fila.`,
         },
       });
-      return null;
+      return atendente;
     }
 
     return atendente;
