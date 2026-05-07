@@ -287,7 +287,7 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve(this.conversation_info);
   }
 
-  toggle_conversation_status(p: { id_user: string; target_status: "open" | "resolved" | "pending" | "snoozed" }): Promise<void> {
+  toggle_conversation_status(p: { id_user: string; status: "open" | "resolved" | "pending" | "snoozed" }): Promise<void> {
     console.log(`simulando toggle_conversation: ${JSON.stringify(p)}`);
     return Promise.resolve();
   }
