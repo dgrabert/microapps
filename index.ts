@@ -16,6 +16,7 @@ export type {
   ConversationInfo,
   ConversationMeta,
   Team,
+  TeamMember,
   TemplateComponent,
 } from "./interfaces.ts";
 export {
