@@ -6,9 +6,14 @@ export {
   p,
   postprocessing,
   preprocessing,
-  wrapperMethod
+  wrapperMethod,
 } from "./decorators.ts";
-export type { AIParam, AIObjectConfig, AIParamType, AiFunctionSettings } from "./decorators.ts";
+export type {
+  AiFunctionSettings,
+  AIObjectConfig,
+  AIParam,
+  AIParamType,
+} from "./decorators.ts";
 export type { Etapa } from "./fluxo.ts";
 export type {
   AgentInfo,
@@ -20,10 +25,10 @@ export type {
   TemplateComponent,
 } from "./interfaces.ts";
 export {
-  TemplateMessage,
-  TelegramInterface,
   Message,
   MessageContent,
+  TelegramInterface,
+  TemplateMessage,
 } from "./interfaces.ts";
 export type { MensagemLLM } from "./llm.ts";
 export type { Mensagem } from "./mensagens.ts";
@@ -46,22 +51,24 @@ export type {
   CVEmpreendimentoDetalhe,
   CVInteracao,
   CVLead,
+  CVLeadSalvarInteracao,
+  CVLeadSalvarRequest,
   CVSituacao,
   RDContact,
   RDDeal,
   RDTeam,
 } from "./crm.ts";
 export {
-  PortalAPI,
-  RobosAdapter,
+  BancoConhecimentosAdapter,
+  CampanhasAdapter,
   CanaisAdapter,
   ConversasAdapter,
-  CampanhasAdapter,
-  IntegracoesAdapter,
-  FontesDadosAdapter,
-  BancoConhecimentosAdapter,
-  MicroappsAdapter,
   DashboardAdapter,
+  FontesDadosAdapter,
+  IntegracoesAdapter,
+  MicroappsAdapter,
+  PortalAPI,
+  RobosAdapter,
 } from "./portalApi.ts";
 export { MicroAppUtils } from "./utils.ts";
 export { MicroappManager } from "./microapp_manager.ts";

@@ -73,6 +73,27 @@ export type CVInteracao = {
   data_cad?: string;
 };
 
+export type CVLeadSalvarInteracao = {
+  tipo: "W";
+  descricao: string;
+};
+
+export type CVLeadSalvarRequest = {
+  acao: "alteracao" | "inclusao";
+  permitir_alteracao?: boolean;
+  nome: string;
+  telefone: string;
+  email: string;
+  telefone_alternativo?: string;
+  modulo: "gestor";
+  origem: "CH";
+  idsituacao?: number;
+  tags: string[];
+  interacoes?: CVLeadSalvarInteracao;
+  midia?: string;
+  campos_adicionais?: Record<string, any>;
+};
+
 export type CVLead = {
   idlead: number;
   situacao?: CVSituacao;
@@ -193,6 +214,14 @@ export class CVCRM {
     _p: { id_usuario: string },
   ): Promise<[Record<string, string> | null, CVLead | null]> {
     return Promise.resolve([null, null]);
+  }
+
+  @wrapperMethod
+  salvar_lead(_p: {
+    id_usuario: string;
+    json_body: CVLeadSalvarRequest;
+  }): Promise<void> {
+    return Promise.resolve();
   }
 
   @wrapperMethod
