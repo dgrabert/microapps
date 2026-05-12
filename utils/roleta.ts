@@ -8,6 +8,7 @@ export type RoletaAtendente = {
 };
 
 export class RoletaChatwoot {
+  public motivoEscolha?: "only_one" | "next" | "next_online" | "next_fallback";
   constructor(
     private options: {
       microapp: MicroApp;
@@ -167,6 +168,7 @@ export class RoletaChatwoot {
     // de resto eh igual, com a desvantagem que o corretor novo por entrar antes do D, vai demorar pra receber leads
 
     const microapp = this.options.microapp;
+    this.motivoEscolha = undefined;
 
     let atendentes: RoletaAtendente[] = this.options.atendentes ||
       await microapp.infosRobo.get({
@@ -189,6 +191,7 @@ export class RoletaChatwoot {
     }
 
     if (atendentes.length === 1) {
+      this.motivoEscolha = "only_one";
       return atendentes[0];
     }
 
@@ -245,6 +248,7 @@ export class RoletaChatwoot {
         atendente_elegivel = true;
 
         if (this.options.somente_atendentes_online) {
+          this.motivoEscolha = "next_online";
           await microapp.logger.debug({
             msg: {
               "Roleta":
@@ -254,6 +258,7 @@ export class RoletaChatwoot {
             },
           });
         } else {
+          this.motivoEscolha = "next";
           await microapp.logger.debug({
             msg: {
               "Roleta":
@@ -281,6 +286,7 @@ export class RoletaChatwoot {
             `Nenhum atendente elegível após ${max_tentativas} tentativas. Elegendo o próximo da fila.`,
         },
       });
+      this.motivoEscolha = "next_fallback";
       return atendente;
     }
 
