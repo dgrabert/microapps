@@ -81,13 +81,20 @@ export type CVLeadSalvarInteracao = {
 export type CVLeadSalvarRequest = {
   acao: "alteracao" | "inclusao";
   permitir_alteracao?: boolean;
+  permitir_trocar_atendente?: boolean;
   nome: string;
   telefone: string;
   email: string;
   telefone_alternativo?: string;
+  idlead?: number;
+  idempreendimento?: number | number[];
+  idcorretor?: number;
+  email_corretor?: string;
   modulo: "gestor";
   origem: "CH";
   idsituacao?: number;
+  lead_utilizar_fila?: boolean;
+  utilizar_fila_corretor?: boolean;
   tags: string[];
   interacoes?: CVLeadSalvarInteracao;
   midia?: string;
