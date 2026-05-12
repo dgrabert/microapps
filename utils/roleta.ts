@@ -53,6 +53,10 @@ export class RoletaChatwoot {
       return null;
     }
 
+    if (atendentes.length === 1) {
+      return atendentes[0];
+    }
+
     const atual = await microapp.infosRobo.get({
       chave: this.chave_index(),
     }) || 0;
