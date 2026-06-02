@@ -2,9 +2,9 @@ import { wrapper } from "./decorators.ts";
 
 @wrapper
 export class VarsUser {
-  _dados: Record<string, any> = {};
+  _dados: Record<string, string> = {};
 
-  get(p: { chave: string }): Promise<any | undefined> {
+  get(p: { chave: string }): Promise<string | undefined> {
     if (!p.chave) {
       return Promise.reject("Parametro chave obrigatorio");
     }
@@ -17,6 +17,10 @@ export class VarsUser {
     }
     this._dados[p.chave] = p.conteudo;
     return Promise.resolve(true);
+  }
+
+  get_all(): Promise<Record<string, string>> {
+    return Promise.resolve({ ...this._dados });
   }
 
   delete(p: { chave: string }): Promise<boolean> {
