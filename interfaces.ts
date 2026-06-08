@@ -240,6 +240,22 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve({});
   }
 
+  assign_agent(p: {
+    id_user: string;
+    person_destination: string;
+  }): Promise<boolean | null> {
+    console.log(`simulando assign_agent: ${JSON.stringify(p)}`);
+    return Promise.resolve(true);
+  }
+
+  assign_team(p: {
+    id_user: string;
+    team_destination: string;
+  }): Promise<boolean | null> {
+    console.log(`simulando assign_team: ${JSON.stringify(p)}`);
+    return Promise.resolve(true);
+  }
+
   update_contact_name(p: { id_user: string; name: string }): Promise<boolean> {
     console.log(`simulando update_contact_name: ${JSON.stringify(p)}`);
     return Promise.resolve(true);
