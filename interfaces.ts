@@ -266,11 +266,15 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve();
   }
 
+  set_labels(p: { id_user: string; labels: string[] }): Promise<void> {
+    console.log(`simulando set_labels: ${JSON.stringify(p)}`);
+    return Promise.resolve();
+  }
+
   send_private_note(p: { id_user: string; content: string }): Promise<void> {
     console.log(`simulando send_private_note: ${JSON.stringify(p)}`);
     return Promise.resolve();
   }
-
 
   get_teams(): Promise<Team[]> {
     console.log(`simulando get_teams`);
