@@ -1,6 +1,6 @@
 import { GestorArquivos } from "./arquivos.ts";
 import { ControladorFluxo } from "./fluxo.ts";
-import { InfosRobo, InfosUser } from "./infosUser.ts";
+import { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 import {
   ChatWootInterface,
   ControladorInterface,
@@ -25,6 +25,7 @@ export class MicroApp {
   vars: VarsUser;
   infosUser: InfosUser;
   infosRobo: InfosRobo;
+  infosConta: InfosConta;
   logger: Logger;
   fluxo: ControladorFluxo;
   prompt: PromptNode;
@@ -104,6 +105,7 @@ export class MicroApp {
     this.fluxo = new ControladorFluxo();
     this.infosUser = new InfosUser();
     this.infosRobo = new InfosRobo();
+    this.infosConta = new InfosConta();
     this.prompt = new PromptNode("Mock Root");
     this.gestor_arquivos = new GestorArquivos();
     this.conversa = new Conversa();

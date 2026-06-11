@@ -1,4 +1,5 @@
 export { MicroApp } from "./base.ts";
+export { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 export {
   aiFunction,
   exposed,
