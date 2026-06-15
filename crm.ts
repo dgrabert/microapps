@@ -99,6 +99,8 @@ export type CVLeadSalvarRequest = {
   interacoes?: CVLeadSalvarInteracao;
   midia?: string;
   campos_adicionais?: Record<string, any>;
+  remover_corretor?: boolean;
+  remover_imobiliaria?: boolean;
 };
 
 export type CVLead = {
@@ -201,6 +203,10 @@ export class RDStationCRM {
 }
 
 export class CVCRM {
+  leads: CVLead[] = [];
+  corretores: CVCorretor[] = [];
+  empreendimentos: CVEmpreendimentoDetalhe[] = [];
+
   @wrapperMethod
   api_request(_p: {
     path: string;
@@ -212,40 +218,108 @@ export class CVCRM {
   }
 
   @wrapperMethod
-  get_lead_by_id(_p: { idlead: string }): Promise<CVLead | null> {
-    return Promise.resolve(null);
+  get_lead_by_id(p: { idlead: string }): Promise<CVLead | null> {
+    return Promise.resolve(
+      this.leads.find((lead) => String(lead.idlead) === String(p.idlead)) ??
+        null,
+    );
   }
 
   @wrapperMethod
   consultar_lead(
-    _p: { id_usuario: string },
+    p: { id_usuario: string },
   ): Promise<[Record<string, string> | null, CVLead | null]> {
-    return Promise.resolve([null, null]);
+    const telefone = String(p.id_usuario).split("_").slice(1).join("_");
+    const lead = telefone
+      ? this.leads.find((lead) => String(lead.telefone) === telefone) ?? null
+      : null;
+    return Promise.resolve([null, lead]);
   }
 
   @wrapperMethod
-  salvar_lead(_p: {
+  salvar_lead(p: {
     id_usuario: string;
     json_body: CVLeadSalvarRequest;
   }): Promise<void> {
+    const body = p.json_body;
+    const telefoneUsuario = String(p.id_usuario).split("_").slice(1).join("_");
+    const idlead = body.idlead == null ? undefined : Number(body.idlead);
+    let lead = idlead == null
+      ? undefined
+      : this.leads.find((lead) => Number(lead.idlead) === idlead);
+
+    if (!lead) {
+      lead = {
+        idlead: idlead ?? this.proximoIdLead(),
+      };
+      this.leads.push(lead);
+    }
+
+    lead.nome = body.nome;
+    lead.telefone = body.telefone || telefoneUsuario || lead.telefone;
+    lead.email = body.email;
+    lead.tags = body.tags;
+
+    if (body.idsituacao != null) {
+      lead.situacao = { ...lead.situacao, id: body.idsituacao };
+    }
+
+    if (body.remover_corretor || body.remover_imobiliaria) {
+      delete lead.corretor;
+    } else if (body.idcorretor != null) {
+      lead.corretor = this.corretores.find((corretor) =>
+        String(corretor.idcorretor ?? corretor.id) === String(body.idcorretor)
+      );
+    } else if (body.email_corretor) {
+      lead.corretor = this.corretores.find((corretor) =>
+        corretor.email === body.email_corretor
+      );
+    }
+
+    if (body.idempreendimento != null) {
+      const ids = Array.isArray(body.idempreendimento)
+        ? body.idempreendimento
+        : [body.idempreendimento];
+      lead.empreendimento = ids.map((id) => ({ id }));
+    }
+
     return Promise.resolve();
   }
 
   @wrapperMethod
-  get_corretor_by_id(_p: { id_corretor: string }): Promise<CVCorretor | null> {
-    return Promise.resolve(null);
+  get_corretor_by_id(p: { id_corretor: string }): Promise<CVCorretor | null> {
+    return Promise.resolve(
+      this.corretores.find((corretor) =>
+        String(corretor.idcorretor ?? corretor.id) === String(p.id_corretor)
+      ) ?? null,
+    );
   }
 
   @wrapperMethod
   get_empreendimento_by_id(
-    _p: { id_empreendimento: string },
+    p: { id_empreendimento: string },
   ): Promise<CVEmpreendimentoDetalhe | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.empreendimentos.find((empreendimento) =>
+        String(
+          empreendimento.idempreendimento_int ??
+            empreendimento.idempreendimento,
+        ) === String(p.id_empreendimento)
+      ) ?? null,
+    );
   }
 
   @wrapperMethod
   list_situacoes(): Promise<CVSituacao[]> {
     return Promise.resolve([]);
+  }
+
+  private proximoIdLead(): number {
+    const maiorId = this.leads.reduce(
+      (maior, lead) => Math.max(maior, Number(lead.idlead) || 0),
+      0,
+    );
+    return maiorId + 1;
   }
 }
 
