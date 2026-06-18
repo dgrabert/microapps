@@ -10,12 +10,17 @@ export type MensagemLLM = {
 
 @wrapper
 export class GPT {
+  modelo: string = "mock";
+  resposta_mock?: [string, string, any];
+
   /**
    * Define o modelo LLM a ser utilizado.
    *
    * @param modelo - Nome do modelo a ser utilizado (ex: "gpt-4o-mini")
    */
-  async set_modelo({ modelo }: { modelo: string }): Promise<void> {}
+  async set_modelo({ modelo }: { modelo: string }): Promise<void> {
+    this.modelo = modelo;
+  }
 
   /**
    * Executa uma chamada ao LLM e retorna a resposta.
@@ -34,7 +39,12 @@ export class GPT {
     tools?: any[];
     response_format?: Record<string, any>;
   }): Promise<[string, string, any]> {
-    return ["", "", null];
+    if (this.resposta_mock) {
+      return this.resposta_mock;
+    }
+    const ultimaMensagem =
+      mensagens.findLast((mensagem) => mensagem.content)?.content ?? "";
+    return [`mock(${this.modelo}): ${ultimaMensagem}`, "stop", null];
   }
 
   /**
@@ -60,6 +70,6 @@ export class GPT {
     resposta_padrao?: boolean;
     cadeia_pensamentos?: boolean;
   }): Promise<boolean> {
-    return false;
+    return resposta_padrao;
   }
 }

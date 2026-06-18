@@ -20,6 +20,7 @@ export type RespostaAgendamento = {
 export class SchedulerMetodos {
   _methods: Record<string, any> = {};
   _tarefas: Tarefa[] = [];
+  _proximo_id: number = 1;
 
   agenda_tarefa(p: {
     method_name: string;
@@ -31,7 +32,7 @@ export class SchedulerMetodos {
     this._methods[p.method_name] = p;
     const resposta = {
       success: true,
-      data: { id: String(Math.round(Math.random() * 1000)) },
+      data: { id: String(this._proximo_id++) },
     };
     this._tarefas.push({
       id: resposta.data.id,
@@ -50,15 +51,25 @@ export class SchedulerMetodos {
     return Promise.resolve();
   }
 
-  listar_tarefas(_p: { microapp_id?: number }): Promise<Tarefa[]> {
-    return Promise.resolve(this._tarefas);
+  listar_tarefas(p: { microapp_id?: number }): Promise<Tarefa[]> {
+    if (p.microapp_id == null) {
+      return Promise.resolve(this._tarefas);
+    }
+    return Promise.resolve(
+      this._tarefas.filter((t) => t.id_microapp === p.microapp_id),
+    );
   }
 
   cancelar_tarefa(p: {
     method_name: string;
     microapp_id?: number;
   }): Promise<void> {
-    this._tarefas = this._tarefas.filter((t) => t.metodo !== p.method_name);
+    this._tarefas = this._tarefas.filter((t) => {
+      if (t.metodo !== p.method_name) {
+        return true;
+      }
+      return p.microapp_id != null && t.id_microapp !== p.microapp_id;
+    });
     return Promise.resolve();
   }
 }

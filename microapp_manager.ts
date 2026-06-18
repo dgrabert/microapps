@@ -13,6 +13,14 @@ import { wrapper } from "./decorators.ts";
 @wrapper
 export class MicroappManager {
   __meta__: Record<string, unknown> = {};
+  _microapps: {
+    id: number;
+    nome: string;
+    url: string;
+    branch: string;
+    entrypoint: string;
+  }[] = [];
+  _proximo_id: number = 1;
 
   async criar_microapp(p: {
     nome: string;
@@ -29,7 +37,15 @@ export class MicroappManager {
     entrypoint?: string;
     erro?: string;
   }> {
-    return null!;
+    const microapp = {
+      id: this._proximo_id++,
+      nome: p.nome,
+      url: p.url,
+      branch: p.branch,
+      entrypoint: p.entrypoint,
+    };
+    this._microapps.push(microapp);
+    return microapp;
   }
 
   async atualizar_microapp(p: {
@@ -48,13 +64,28 @@ export class MicroappManager {
     entrypoint?: string;
     erro?: string;
   }> {
-    return null!;
+    const microapp = this._microapps.find((item) => item.id === p.id_microapp);
+    if (!microapp) {
+      return { erro: "Microapp não encontrado" };
+    }
+    if (p.nome != null) microapp.nome = p.nome;
+    if (p.url != null) microapp.url = p.url;
+    if (p.branch != null) microapp.branch = p.branch;
+    if (p.entrypoint != null) microapp.entrypoint = p.entrypoint;
+    return microapp;
   }
 
   async deletar_microapp(p: {
     id_microapp: number;
   }): Promise<{ ok?: boolean; id?: number; erro?: string }> {
-    return null!;
+    const tamanhoAntes = this._microapps.length;
+    this._microapps = this._microapps.filter((item) =>
+      item.id !== p.id_microapp
+    );
+    if (this._microapps.length === tamanhoAntes) {
+      return { ok: false, id: p.id_microapp, erro: "Microapp não encontrado" };
+    }
+    return { ok: true, id: p.id_microapp };
   }
 
   async listar_microapps(
@@ -68,7 +99,7 @@ export class MicroappManager {
       entrypoint: string;
     }[]
   > {
-    return null!;
+    return this._microapps;
   }
 
   async validar_schema(p: {
@@ -78,7 +109,10 @@ export class MicroappManager {
     user?: string;
     secret?: string;
   }): Promise<{ valido: boolean; erro?: string | null }> {
-    return null!;
+    if (!p.url || !p.branch || !p.entrypoint) {
+      return { valido: false, erro: "Campos obrigatórios ausentes" };
+    }
+    return { valido: true, erro: null };
   }
 
   async executar_conversa_efemera(p: {
@@ -91,6 +125,13 @@ export class MicroappManager {
     erros: string[];
     estado_final: Record<string, unknown>;
   }> {
-    return null!;
+    return {
+      respostas: p.mensagens.map((mensagem) => `mock: ${mensagem}`),
+      erros: [],
+      estado_final: {
+        infos_user: p.infos_user ?? {},
+        vars_user: p.vars_user ?? {},
+      },
+    };
   }
 }

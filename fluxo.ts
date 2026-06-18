@@ -8,6 +8,7 @@ export type Etapa = {
 export class ControladorFluxo {
   _etapa_atual: string = "Etapa 1";
   _etapa_anterior: string = "Etapa anterior";
+  _mudou_etapa: boolean = false;
   _etapas: Etapa[] = [
     { nome: "Etapa 1" },
     { nome: "Etapa 2" },
@@ -25,6 +26,7 @@ export class ControladorFluxo {
     p: { nome_etapa: string; gerar_evento_crm?: boolean },
   ): Promise<void> {
     console.log(`Fluxo: ${this._etapa_atual} -> ${p.nome_etapa}`);
+    this._mudou_etapa = this._etapa_atual !== p.nome_etapa;
     this._etapa_anterior = this._etapa_atual;
     this._etapa_atual = p.nome_etapa;
     return Promise.resolve();
@@ -39,11 +41,14 @@ export class ControladorFluxo {
 
   voltar_etapa(_p?: { gerar_evento_crm?: boolean }): Promise<void> {
     console.log(`Fluxo: ${this._etapa_atual} -> ${this._etapa_anterior}`);
+    this._mudou_etapa = this._etapa_atual !== this._etapa_anterior;
     this._etapa_atual = this._etapa_anterior;
     return Promise.resolve();
   }
 
   mudou_etapa(): Promise<boolean> {
-    return Promise.resolve(false);
+    const mudou = this._mudou_etapa;
+    this._mudou_etapa = false;
+    return Promise.resolve(mudou);
   }
 }

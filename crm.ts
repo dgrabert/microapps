@@ -116,89 +116,162 @@ export type CVLead = {
 };
 
 export class RDStationCRM {
+  api_requests: Array<{
+    path: string;
+    method: string;
+    data?: Record<string, any> | null;
+    query_params?: Record<string, any>;
+  }> = [];
+  contacts: RDContact[] = [];
+  deals: RDDeal[] = [];
+  pipelines: Array<{ id: string; name: string }> = [];
+  stages_by_pipeline_id: Record<
+    string,
+    Array<{ id: string; name: string; order?: number }>
+  > = {};
+  users: Array<{ id: string; email: string; name?: string }> = [];
+  custom_fields: Array<
+    { id: string; name: string; slug?: string; entity?: string }
+  > = [];
+  teams: RDTeam[] = [];
+  private nextContactId = 1;
+  private nextDealId = 1;
+
   @wrapperMethod
-  api_request(_p: {
+  api_request(p: {
     path: string;
     method: string;
     data?: Record<string, any> | null;
     query_params?: Record<string, any>;
   }): Promise<any> {
-    return Promise.resolve();
+    this.api_requests.push({ ...p });
+    return Promise.resolve(p.data ?? null);
   }
 
   @wrapperMethod
-  find_contact(_p: {
+  find_contact(p: {
     id_user: string;
   }): Promise<RDContact | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.contacts.find((contact) =>
+        contact.id === p.id_user || contact.custom_fields?.id_user === p.id_user
+      ) ?? null,
+    );
   }
 
   @wrapperMethod
-  create_contact(_p: {
+  create_contact(p: {
     id_user: string;
   }): Promise<RDContact> {
-    return Promise.resolve({} as RDContact);
+    const existing = this.contacts.find((contact) =>
+      contact.id === p.id_user || contact.custom_fields?.id_user === p.id_user
+    );
+    if (existing) {
+      return Promise.resolve(existing);
+    }
+
+    const contact: RDContact = {
+      id: `mock-contact-${this.nextContactId++}`,
+      custom_fields: { id_user: p.id_user },
+    };
+    this.contacts.push(contact);
+    return Promise.resolve(contact);
   }
 
   @wrapperMethod
   find_ai_deal(_p: {
     contact_id: string;
   }): Promise<RDDeal | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.deals.find((deal) => deal.contact_ids?.includes(_p.contact_id)) ??
+        null,
+    );
   }
 
   @wrapperMethod
-  create_ai_deal(_p: {
+  create_ai_deal(p: {
     id_user: string;
     contact_id: string;
     owner_id: string;
     pipeline_id?: string;
     stage_id?: string;
   }): Promise<RDDeal> {
-    return Promise.resolve({} as RDDeal);
+    const deal: RDDeal = {
+      id: `mock-deal-${this.nextDealId++}`,
+      contact_ids: [p.contact_id],
+      owner_id: p.owner_id,
+      pipeline_id: p.pipeline_id,
+      stage_id: p.stage_id,
+      status: "ongoing",
+      custom_fields: { id_user: p.id_user },
+    };
+    this.deals.push(deal);
+    return Promise.resolve(deal);
   }
 
   @wrapperMethod
-  save_deal(_p: {
+  save_deal(p: {
     id_contato: string;
     id_deal: string | null;
     data: Record<string, any>;
   }): Promise<RDDeal | null> {
-    return Promise.resolve(null);
+    let deal = p.id_deal == null
+      ? undefined
+      : this.deals.find((deal) => deal.id === p.id_deal);
+    if (!deal) {
+      deal = {
+        id: p.id_deal ?? `mock-deal-${this.nextDealId++}`,
+        contact_ids: [p.id_contato],
+      };
+      this.deals.push(deal);
+    }
+    Object.assign(deal, p.data);
+    if (!deal.contact_ids?.includes(p.id_contato)) {
+      deal.contact_ids = [...(deal.contact_ids ?? []), p.id_contato];
+    }
+    return Promise.resolve(deal);
   }
 
   @wrapperMethod
-  get_pipeline_by_name(_p: {
+  get_pipeline_by_name(p: {
     name: string;
   }): Promise<{ id: string; name: string } | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.pipelines.find((pipeline) => pipeline.name === p.name) ?? null,
+    );
   }
 
   @wrapperMethod
-  get_stages_by_pipeline_id(_p: {
+  get_stages_by_pipeline_id(p: {
     pipeline_id: string;
   }): Promise<Array<{ id: string; name: string; order?: number }>> {
-    return Promise.resolve([]);
+    return Promise.resolve(this.stages_by_pipeline_id[p.pipeline_id] ?? []);
   }
 
   @wrapperMethod
-  get_user_by_email(_p: {
+  get_user_by_email(p: {
     email: string;
   }): Promise<{ id: string; email: string; name?: string } | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.users.find((user) => user.email === p.email) ?? null,
+    );
   }
 
   @wrapperMethod
-  get_custom_field_by_name(_p: {
+  get_custom_field_by_name(p: {
     name: string;
     entity?: string;
   }): Promise<{ id: string; name: string; slug?: string } | null> {
-    return Promise.resolve(null);
+    return Promise.resolve(
+      this.custom_fields.find((field) =>
+        field.name === p.name && (p.entity == null || field.entity === p.entity)
+      ) ?? null,
+    );
   }
 
   @wrapperMethod
   list_teams(): Promise<RDTeam[]> {
-    return Promise.resolve([]);
+    return Promise.resolve(this.teams);
   }
 }
 
@@ -206,6 +279,7 @@ export class CVCRM {
   leads: CVLead[] = [];
   corretores: CVCorretor[] = [];
   empreendimentos: CVEmpreendimentoDetalhe[] = [];
+  situacoes: CVSituacao[] = [];
 
   @wrapperMethod
   api_request(_p: {
@@ -311,7 +385,7 @@ export class CVCRM {
 
   @wrapperMethod
   list_situacoes(): Promise<CVSituacao[]> {
-    return Promise.resolve([]);
+    return Promise.resolve(this.situacoes);
   }
 
   private proximoIdLead(): number {

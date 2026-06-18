@@ -46,11 +46,46 @@ export class Conversa {
       tag_name?: string;
     },
   ): Promise<string> {
-    return Promise.resolve("");
+    let mensagens = this.mensagens;
+
+    if (params.ignore_tools_msgs) {
+      mensagens = mensagens.filter((m) => m.origem !== "tool");
+    }
+
+    if (params.backlog != null) {
+      mensagens = mensagens.slice(-params.backlog);
+    }
+
+    let userCount = 0;
+    const linhas: string[] = [];
+    for (const mensagem of mensagens) {
+      if (params.max_input_user != null && mensagem.origem === "cliente") {
+        userCount++;
+        if (userCount > params.max_input_user) {
+          continue;
+        }
+      }
+
+      const conteudo = mensagem.conteudo.texto ?? mensagem.conteudo.midia ??
+        mensagem.conteudo.audio ??
+        JSON.stringify(mensagem.conteudo.tool_calls ?? "");
+      const origem = params.tag_name
+        ? `${params.tag_name}:${mensagem.origem}`
+        : mensagem.origem;
+      linhas.push(`${origem}: ${conteudo}`);
+    }
+
+    return Promise.resolve(linhas.join("\n"));
   }
 
   ultima_interacao(params: { origem?: string } = {}): Promise<string> {
-    return Promise.resolve("");
+    const mensagem = this.mensagens.findLast((m) => {
+      if (params.origem) {
+        return m.origem === params.origem;
+      }
+      return true;
+    });
+    return Promise.resolve(mensagem?.conteudo.texto ?? "");
   }
 
   append(params: { mensagem: Mensagem }): Promise<void> {
@@ -81,17 +116,27 @@ export class Conversa {
   }
 
   pega_ultimo_bloco(params: { origem: string }): Promise<Mensagem[]> {
-    return Promise.resolve([]);
+    const bloco: Mensagem[] = [];
+    for (let i = this.mensagens.length - 1; i >= 0; i--) {
+      const mensagem = this.mensagens[i];
+      if (mensagem.origem !== params.origem) {
+        break;
+      }
+      bloco.unshift(mensagem);
+    }
+    return Promise.resolve(bloco);
   }
 
   primeira_msg_do_cliente(): Promise<boolean> {
-    return Promise.resolve(false);
+    return Promise.resolve(
+      this.mensagens.filter((m) => m.origem === "cliente").length === 1,
+    );
   }
 
   ultima_mensagem_origem(
     params: { origem?: string } = {},
   ): Promise<Mensagem | null> {
-    return Promise.resolve(null);
+    return this.get_last_message(params);
   }
 
   pega_todas_mensagens(
@@ -103,6 +148,9 @@ export class Conversa {
      * @param ignore_debug_msgs - Se true, ignora mensagens do tipo debug.
      * @returns Lista com todas as mensagens da conversa.
      */
+    if (params.ignore_debug_msgs) {
+      return Promise.resolve(this.mensagens.filter((m) => m.tipo !== "debug"));
+    }
     return Promise.resolve(this.mensagens);
   }
 

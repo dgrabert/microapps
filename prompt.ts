@@ -56,6 +56,12 @@ export class PromptNode {
   }
 
   from_json({ jsonString }: { jsonString: string }): Promise<void> {
+    const parsed = JSON.parse(jsonString);
+    this.name = parsed.name;
+    this.items = Array.isArray(parsed.items) ? parsed.items : [];
+    this.children = Array.isArray(parsed.children)
+      ? parsed.children.map((child: any) => this.nodeFromObject(child))
+      : [];
     return Promise.resolve();
   }
 
@@ -73,5 +79,14 @@ export class PromptNode {
       return result;
     };
     return Promise.resolve(formatNode(this, 0));
+  }
+
+  private nodeFromObject(value: any): PromptNode {
+    const node = new PromptNode(value.name);
+    node.items = Array.isArray(value.items) ? value.items : [];
+    node.children = Array.isArray(value.children)
+      ? value.children.map((child: any) => this.nodeFromObject(child))
+      : [];
+    return node;
   }
 }
