@@ -2,6 +2,7 @@ export { MicroApp } from "./base.ts";
 export { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 export {
   aiFunction,
+  api,
   exposed,
   moderator,
   p,
@@ -9,6 +10,19 @@ export {
   preprocessing,
   wrapperMethod,
 } from "./decorators.ts";
+export {
+  ApiHeaders,
+  ApiQuery,
+  ApiRequest,
+  ApiResponse,
+} from "./api.ts";
+export type {
+  ApiAuth,
+  ApiDecoratorConfig,
+  ApiMethod,
+  ApiRequestInit,
+  ApiResponseInit,
+} from "./api.ts";
 export type {
   AiFunctionSettings,
   AIObjectConfig,

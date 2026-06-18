@@ -3,7 +3,294 @@
 ## Instalacao
 
 ```typescript
-import { MicroApp, aiFunction, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.30.0";
+import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.35.0";
+```
+
+---
+
+## HTTP API com `@api`
+
+`@api` registra um metodo do microapp como handler HTTP. Ele serve para dashboards, webhooks
+customizados, arquivos, endpoints JSON/texto/binario e integracoes que precisam chamar o microapp
+direto pelo browser ou por ferramentas externas.
+
+Ele e diferente de `@exposed`: `@api` recebe uma request HTTP estruturada e retorna uma resposta
+HTTP completa; nao passa pelo LLM e nao envia mensagem para WhatsApp/Chatwoot.
+
+### Import
+
+```typescript
+import {
+    api,
+    ApiRequest,
+    ApiResponse,
+    MicroApp,
+} from "jsr:@virti/microapp-sdk@0.35.0";
+```
+
+### Rota no backend
+
+O backend chama APIs de microapps TS pela rota:
+
+```text
+/api/v1/robo/<id_robo>/microapp/<id_microapp>/api/<path>
+```
+
+Exemplo:
+
+```text
+GET /api/v1/robo/123/microapp/456/api/dash/projetos
+```
+
+Async usa `async=1` na query string:
+
+```text
+POST /api/v1/robo/123/microapp/456/api/relatorio?async=1
+```
+
+Consulta de status:
+
+```text
+GET /api/v1/robo/123/microapp/456/api-requests/<request_id>
+```
+
+### Decorator
+
+```typescript
+@api({ path: "/dash/*", methods: ["GET", "POST", "PATCH"] })
+async dashboard(req: ApiRequest): Promise<ApiResponse> {
+    return ApiResponse.json({ ok: true });
+}
+```
+
+Campos do decorator:
+
+- `path`: caminho publico dentro de `/api/...`. Aceita path exato (`/status`) ou wildcard de prefixo (`/dash/*`).
+- `methods`: lista de metodos HTTP permitidos. Se omitido, aceita `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD` e `OPTIONS`.
+- `auth`: opcional. Somente `auth: "portal"` exige token/sessao do Portal. Qualquer outro valor, vazio ou ausente e tratado como publico.
+
+### Request
+
+O metodo recebe `ApiRequest`:
+
+```typescript
+type ApiRequest = {
+    requestId: string;
+    method: string;
+    path: string;
+    query: ApiQuery;
+    headers: ApiHeaders;
+    contentType: string | null;
+    contentLength: number;
+    idRobo: number;
+    idMicroapp: number;
+    idUsuario: string | null;
+    portal: Record<string, unknown> | null;
+
+    json(): Promise<unknown>;
+    text(): Promise<string>;
+    arrayBuffer(): Promise<ArrayBuffer>;
+};
+```
+
+Helpers:
+
+```typescript
+const token = req.headers.get("x-dashboard-key");
+const busca = req.query.get("busca");
+const todos = req.query.getAll("tag");
+const body = await req.json();
+```
+
+Identidade:
+
+- `req.idUsuario === null`: primeira execucao, na sandbox API do robo.
+- `req.idUsuario !== null`: execucao ja esta na sandbox do usuario escolhido via `ApiResponse.asUser()`.
+- O browser nunca deve enviar `idUsuario` como fonte de verdade. Se precisar autenticar usuario, o microapp deve validar header/cookie/body/chave propria e entao usar `asUser`.
+- Com `auth: "portal"`, `req.portal` contem a sessao Portal autenticada. Isso nao substitui `asUser`; e apenas autenticacao Portal do endpoint.
+
+### Response
+
+O metodo pode retornar `ApiResponse` ou qualquer objeto serializavel. Se retornar objeto puro, o backend trata como JSON `200`.
+
+```typescript
+return ApiResponse.json({ ok: true }, { status: 200 });
+
+return ApiResponse.text("ok", {
+    status: 200,
+    headers: { "x-debug": "1" },
+});
+
+return ApiResponse.binary(bytes, {
+    status: 200,
+    contentType: "application/pdf",
+    headers: { "content-disposition": "attachment; filename=relatorio.pdf" },
+});
+
+return ApiResponse.empty({ status: 204 });
+```
+
+O backend valida status HTTP, sanitiza headers contra quebra de linha (`\r`/`\n`) e calcula headers controlados como `Content-Length`.
+
+### `ApiResponse.asUser(idUsuario)`
+
+`asUser` nao e uma resposta enviada ao browser. E um sinal interno para o backend reexecutar o mesmo handler na sandbox do usuario real.
+
+Fluxo:
+
+1. Browser chama `@api` sem `id_usuario`.
+2. Backend roda o handler na sandbox API do robo (`req.idUsuario === null`).
+3. Microapp valida chave/cookie/header/body do jeito que quiser.
+4. Microapp retorna `ApiResponse.asUser("chatwoot_123")`.
+5. Backend reexecuta o mesmo handler com `id_usuario = "chatwoot_123"`.
+6. Na segunda execucao, `this.infosUser`, `this.vars`, `this.conversa`, `this.scheduler`, etc. ja estao bindados ao usuario real.
+7. A resposta da segunda execucao e enviada ao browser.
+
+Exemplo:
+
+```typescript
+export default class TasksBoard extends MicroApp {
+    constructor() {
+        super();
+    }
+
+    @api({ path: "/dash/*", methods: ["GET", "POST", "PATCH"] })
+    async dashboard(req: ApiRequest): Promise<ApiResponse> {
+        if (req.idUsuario === null) {
+            const chave = req.headers.get("x-dashboard-key") ?? req.query.get("key");
+            const idUsuario = await this.validarChaveDashboard(chave);
+
+            if (!idUsuario) {
+                return ApiResponse.json(
+                    { erro: "Ative o dashboard conversando com o robo." },
+                    { status: 401 },
+                );
+            }
+
+            return ApiResponse.asUser(idUsuario);
+        }
+
+        if (req.method === "GET") {
+            return ApiResponse.json(await this.carregarDashboard(req.idUsuario));
+        }
+
+        const body = await req.json();
+        return ApiResponse.json(await this.aplicarMudanca(req.idUsuario, body));
+    }
+
+    private async validarChaveDashboard(chave: string | null): Promise<string | null> {
+        if (!chave) return null;
+
+        // Exemplo: a regra e do microapp. Pode usar infosRobo, infosUser,
+        // varsUser, API externa, cookie assinado, etc.
+        const mapa = await this.infosRobo.get({ chave: "tasks_dashboard_keys" }) ?? {};
+        return mapa[chave]?.id_usuario ?? null;
+    }
+
+    private async carregarDashboard(idUsuario: string) {
+        return { idUsuario, projetos: [] };
+    }
+
+    private async aplicarMudanca(idUsuario: string, body: unknown) {
+        return { ok: true, idUsuario, body };
+    }
+}
+```
+
+O backend permite no maximo uma troca `asUser` por request, para evitar loop.
+
+### Auth Portal
+
+Use `auth: "portal"` quando o endpoint deve exigir sessao/token do Portal antes de chamar o microapp:
+
+```typescript
+@api({ path: "/admin/*", methods: ["GET", "POST"], auth: "portal" })
+async admin(req: ApiRequest) {
+    return ApiResponse.json({ portal: req.portal });
+}
+```
+
+Regras:
+
+- Sem `auth`, o endpoint e publico para o backend.
+- `auth: "portal"` valida a sessao Portal e a conta do robo.
+- Qualquer outro valor em `auth` e ignorado e vira publico.
+- O microapp ainda pode fazer autenticacao propria mesmo com `auth: "portal"`.
+
+### Async
+
+Qualquer handler `@api` pode ser executado em background com `async=1`:
+
+```text
+POST /api/v1/robo/123/microapp/456/api/relatorio?async=1
+```
+
+Resposta imediata:
+
+```json
+{
+    "request_id": "req_...",
+    "status_url": "/api/v1/robo/123/microapp/456/api-requests/req_..."
+}
+```
+
+Status possiveis:
+
+- `pending`: enfileirado.
+- `running`: em execucao.
+- `success`: executou e contem `response`.
+- `error`: falhou com erro sanitizado.
+
+Exemplo de `success`:
+
+```json
+{
+    "status": "success",
+    "response": {
+        "type": "response",
+        "status": 200,
+        "headers": { "content-type": "application/json; charset=utf-8" },
+        "bodyType": "json",
+        "body": { "ok": true }
+    }
+}
+```
+
+### Limites e logs
+
+Limites padrao do backend:
+
+- Body sync: 50 MB.
+- Response sync: 50 MB.
+- Body async: 100 MB.
+- Response async armazenada: 100 MB.
+
+Esses limites sao configuraveis por ambiente no backend.
+
+As chamadas entram em `logs_api`. Headers e body sao logados, com mascaramento por nome para campos comuns de segredo (`authorization`, `cookie`, `x-api-key`, `x-dashboard-key`, `token`, `secret`, `password`, etc.). Se o microapp criar um nome novo para segredo, adicione esse nome ao mascaramento do backend antes de usar em producao.
+
+### Boas praticas
+
+- Nao retorne banco inteiro para o browser; filtre dentro do microapp antes de responder.
+- Nao confie em `idUsuario` vindo do browser; use `asUser` depois de autenticar.
+- Para dashboard multiusuario, prefira uma chave/cookie/header proprio do microapp, validado no primeiro passo com `req.idUsuario === null`.
+- Respostas grandes devem usar async quando fizer sentido.
+- Use `ApiResponse.binary` para arquivos; configure `contentType` corretamente.
+- Evite fazer trabalho pesado em request sync; sync segura uma conexao HTTP aberta.
+- Nao dependa de `@api` para enviar mensagem ao canal. Se precisar disparar conversa/canal, use wrappers apropriados dentro do contexto de usuario apos `asUser`.
+
+### Teste local do SDK
+
+Para testar decorators e helpers do SDK sem publicar no JSR, importe arquivos locais:
+
+```typescript
+import { api, ApiRequest, ApiResponse, MicroApp } from "./index.ts";
+```
+
+Rode os testes locais com mocks dos wrappers:
+
+```shell
+MOCK=1 deno test --allow-env
 ```
 
 ---

@@ -261,7 +261,7 @@ export class RDStationCRM {
   get_custom_field_by_name(p: {
     name: string;
     entity?: string;
-  }): Promise<{ id: string; name: string; slug?: string } | null> {
+  }): Promise<{ id: string; name: string; slug?: string; entity?: string } | null> {
     return Promise.resolve(
       this.custom_fields.find((field) =>
         field.name === p.name && (p.entity == null || field.entity === p.entity)

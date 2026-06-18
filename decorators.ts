@@ -1,4 +1,5 @@
 import { MicroApp } from "./base.ts";
+import { ApiRequest, type ApiDecoratorConfig } from "./api.ts";
 
 /**
  * Decorator que registra um método como etapa de pré-processamento no pipeline do MicroApp.
@@ -6,7 +7,7 @@ import { MicroApp } from "./base.ts";
  * @param tier - Nível de prioridade de execução no pré-processamento.
  */
 export function preprocessing<T>({ tier }: { tier: number }): any {
-  return function (target: T, _context: any) {
+  return function (target: any, _context: any) {
     MicroApp.__pipeline__.preprocessing[target.name] = {
       tier,
       fn: (obj: any) => (target.call(obj)),
@@ -21,7 +22,7 @@ export function preprocessing<T>({ tier }: { tier: number }): any {
  * Moderadores são funções que avaliam a resposta da LLM e podem aprovar ou reprovar a resposta, fazendo com que a LLM gere a resposta novamente com as instruções especificadas.
  */
 export function moderator<T>(): any {
-  return function (target: T, _context: any) {
+  return function (target: any, _context: any) {
     MicroApp.__pipeline__.moderator[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
     };
@@ -268,8 +269,9 @@ export function aiFunction<T extends MicroApp>(
           return await target.call(obj, params);
         } catch (err) {
           const eid = Math.round(Math.random() * 1_000_000);
+          const stack = err instanceof Error ? err.stack : undefined;
           console.log(
-            `Erro ao executar a AI function ${target.name}:\n${err}\n\n${err?.stack}`,
+            `Erro ao executar a AI function ${target.name}:\n${err}\n\n${stack}`,
           );
           return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`;
         }
@@ -286,7 +288,7 @@ export function aiFunction<T extends MicroApp>(
  * @param tier - Nível de prioridade de execução no pós-processamento.
  */
 export function postprocessing<T>({ tier }: { tier: number }): any {
-  return function (target: T, _context: any) {
+  return function (target: any, _context: any) {
     MicroApp.__pipeline__.postprocessing[target.name] = {
       tier,
       fn: (obj: any) => (target.call(obj)),
@@ -304,6 +306,23 @@ export function exposed<T extends Function>(): any {
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.exposed[target.name] = {
       fn: (obj: any, params: object) => (target.call(obj, params)),
+    };
+
+    return target;
+  };
+}
+
+/**
+ * Decorator que registra um método como handler HTTP público do microapp.
+ * Por padrão a rota é pública; somente auth === "portal" exige autenticação do Portal no backend.
+ */
+export function api<T extends Function>(config: ApiDecoratorConfig): any {
+  return function (target: T, _context: any) {
+    MicroApp.__pipeline__.api[target.name] = {
+      path: config.path,
+      methods: config.methods ?? ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+      auth: config.auth === "portal" ? "portal" : undefined,
+      fn: (obj: any, params: object) => target.call(obj, ApiRequest.from(params as any)),
     };
 
     return target;
