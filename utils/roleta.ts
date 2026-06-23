@@ -7,16 +7,35 @@ export type RoletaAtendente = {
   external_id?: string;
 };
 
+type RoletaHistoricoAtendente = {
+  atendente_email: string;
+  id_user: string;
+  timestamp: string;
+  nome_roleta: string;
+};
+
+type RoletaConfigAtendente = {
+  peso?: number;
+};
+
+const TEMPO_SEM_LEAD_PADRAO_SEGUNDOS = 60 * 60;
+
 export class RoletaChatwoot {
   public motivoEscolha?: "only_one" | "next" | "next_online" | "next_fallback";
+  private agora: () => Date;
+
   constructor(
     private options: {
       microapp: MicroApp;
       id_roleta: string;
       atendentes?: readonly RoletaAtendente[];
       somente_atendentes_online?: boolean;
+      ordenacao_por_recencia?: boolean;
+      config_atendentes?: Record<string, RoletaConfigAtendente>;
+      agora?: () => Date;
     },
   ) {
+    this.agora = options.agora ?? (() => new Date());
   }
 
   chave_email(): string {
@@ -29,6 +48,10 @@ export class RoletaChatwoot {
 
   chave_atendentes(): string {
     return `roleta:atendentes:${this.options.id_roleta}`;
+  }
+
+  chave_historico_atendentes(): string {
+    return "roleta:historico_atendentes";
   }
 
   /**
@@ -190,6 +213,10 @@ export class RoletaChatwoot {
       return null;
     }
 
+    if (this.options.ordenacao_por_recencia) {
+      return await this.girarPorRecencia(atendentes);
+    }
+
     if (atendentes.length === 1) {
       this.motivoEscolha = "only_one";
       return atendentes[0];
@@ -291,6 +318,100 @@ export class RoletaChatwoot {
     }
 
     return atendente;
+  }
+
+  private async girarPorRecencia(
+    atendentes: RoletaAtendente[],
+  ): Promise<RoletaAtendente> {
+    const microapp = this.options.microapp;
+    const historico = await microapp.infosConta.get({
+      chave: this.chave_historico_atendentes(),
+    });
+    const historicoAtendentes: RoletaHistoricoAtendente[] = Array.isArray(
+        historico,
+      )
+      ? historico
+      : [];
+    const agora = this.agora().getTime();
+    const tempoSemLeadPorEmail: Record<string, number> = {};
+
+    for (const atendente of atendentes) {
+      tempoSemLeadPorEmail[atendente.email] = TEMPO_SEM_LEAD_PADRAO_SEGUNDOS;
+    }
+
+    for (const item of historicoAtendentes) {
+      if (!(item?.atendente_email in tempoSemLeadPorEmail)) {
+        continue;
+      }
+
+      const timestamp = Date.parse(item.timestamp);
+      if (Number.isNaN(timestamp)) {
+        continue;
+      }
+
+      const tempoSemLead = (agora - timestamp) / 1000;
+      if (tempoSemLead < tempoSemLeadPorEmail[item.atendente_email]) {
+        tempoSemLeadPorEmail[item.atendente_email] = tempoSemLead;
+      }
+    }
+
+    let atendenteEscolhido = atendentes[0];
+    let maiorScore = this.scoreAtendente(
+      atendenteEscolhido.email,
+      tempoSemLeadPorEmail[atendenteEscolhido.email],
+    );
+
+    for (const atendente of atendentes.slice(1)) {
+      const score = this.scoreAtendente(
+        atendente.email,
+        tempoSemLeadPorEmail[atendente.email],
+      );
+      if (score > maiorScore) {
+        atendenteEscolhido = atendente;
+        maiorScore = score;
+      }
+    }
+
+    this.motivoEscolha = "next";
+    await this.registrarHistoricoAtendente(
+      historicoAtendentes,
+      atendenteEscolhido,
+    );
+    return atendenteEscolhido;
+  }
+
+  private scoreAtendente(email: string, tempoSemLead: number): number {
+    return tempoSemLead * this.pesoAtendente(email);
+  }
+
+  private pesoAtendente(email: string): number {
+    const peso = this.options.config_atendentes?.[email]?.peso;
+    if (typeof peso === "number" && Number.isFinite(peso) && peso >= 0) {
+      return peso;
+    }
+    return 1;
+  }
+
+  private async registrarHistoricoAtendente(
+    historico: RoletaHistoricoAtendente[],
+    atendente: RoletaAtendente,
+  ): Promise<void> {
+    const microapp = this.options.microapp;
+    const [, id_user] = await microapp.conversa.ids();
+    await microapp.infosConta.set({
+      chave: this.chave_historico_atendentes(),
+      conteudo: [
+        ...historico.filter((item) =>
+          item?.atendente_email !== atendente.email
+        ),
+        {
+          atendente_email: atendente.email,
+          id_user,
+          timestamp: this.agora().toISOString(),
+          nome_roleta: this.options.id_roleta,
+        },
+      ],
+    });
   }
 
   /**
