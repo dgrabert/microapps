@@ -571,6 +571,48 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
   });
 
   await t.step(
+    "historico global afeta roletas com membros em comum",
+    async () => {
+      const time1: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "B", email: "b@exemplo.com" },
+        { nome: "C", email: "c@exemplo.com" },
+      ];
+      const time2: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "C", email: "c@exemplo.com" },
+        { nome: "D", email: "d@exemplo.com" },
+        { nome: "E", email: "e@exemplo.com" },
+      ];
+
+      const mapp = new TesteRoleta();
+      let agora = new Date("2026-06-22T12:00:00.000Z");
+      const roletaTime1 = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes: time1,
+        id_roleta: "recencia_time_1",
+        ordenacao_por_recencia: true,
+        agora: () => agora,
+      });
+      const roletaTime2 = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes: time2,
+        id_roleta: "recencia_time_2",
+        ordenacao_por_recencia: true,
+        agora: () => agora,
+      });
+
+      assertEquals(await roletaTime2.girar(), time2[0]);
+      agora = new Date("2026-06-22T12:01:00.000Z");
+      assertEquals(await roletaTime1.girar(), time1[1]);
+      agora = new Date("2026-06-22T12:02:00.000Z");
+      assertEquals(await roletaTime1.girar(), time1[2]);
+      agora = new Date("2026-06-22T12:03:00.000Z");
+      assertEquals(await roletaTime2.girar(), time2[2]);
+    },
+  );
+
+  await t.step(
     "salva historico com id_user, timestamp ISO e nome da roleta",
     async () => {
       const atendentes: RoletaAtendente[] = [
