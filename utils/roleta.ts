@@ -336,7 +336,7 @@ export class RoletaChatwoot {
     const tempoSemLeadPorEmail: Record<string, number> = {};
 
     for (const atendente of atendentes) {
-      tempoSemLeadPorEmail[atendente.email] = TEMPO_SEM_LEAD_PADRAO_SEGUNDOS;
+      tempoSemLeadPorEmail[atendente.email] = Number.NaN;
     }
 
     for (const item of historicoAtendentes) {
@@ -350,21 +350,39 @@ export class RoletaChatwoot {
       }
 
       const tempoSemLead = (agora - timestamp) / 1000;
-      if (tempoSemLead < tempoSemLeadPorEmail[item.atendente_email]) {
+      if (
+        Number.isNaN(tempoSemLeadPorEmail[item.atendente_email]) ||
+        tempoSemLead < tempoSemLeadPorEmail[item.atendente_email]
+      ) {
         tempoSemLeadPorEmail[item.atendente_email] = tempoSemLead;
       }
     }
 
+    const maiorTempoSemLead = Math.max(
+      0,
+      ...Object.values(tempoSemLeadPorEmail).filter((tempo) =>
+        !Number.isNaN(tempo)
+      ),
+    );
+    const tempoSemLeadPadrao = Math.max(
+      TEMPO_SEM_LEAD_PADRAO_SEGUNDOS,
+      maiorTempoSemLead + 1,
+    );
+
     let atendenteEscolhido = atendentes[0];
     let maiorScore = this.scoreAtendente(
       atendenteEscolhido.email,
-      tempoSemLeadPorEmail[atendenteEscolhido.email],
+      Number.isNaN(tempoSemLeadPorEmail[atendenteEscolhido.email])
+        ? tempoSemLeadPadrao
+        : tempoSemLeadPorEmail[atendenteEscolhido.email],
     );
 
     for (const atendente of atendentes.slice(1)) {
       const score = this.scoreAtendente(
         atendente.email,
-        tempoSemLeadPorEmail[atendente.email],
+        Number.isNaN(tempoSemLeadPorEmail[atendente.email])
+          ? tempoSemLeadPadrao
+          : tempoSemLeadPorEmail[atendente.email],
       );
       if (score > maiorScore) {
         atendenteEscolhido = atendente;

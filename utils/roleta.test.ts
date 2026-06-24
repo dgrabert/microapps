@@ -265,6 +265,39 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
     assertEquals(result, atendentes[1]);
   });
 
+  await t.step(
+    "sem historico passa atendente com mais de uma hora sem lead",
+    async () => {
+      const atendentes: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "B", email: "b@exemplo.com" },
+      ];
+
+      const mapp = new TesteRoleta();
+      await mapp.infosConta.set({
+        chave: CHAVE_HISTORICO_ATENDENTES,
+        conteudo: [{
+          atendente_email: "a@exemplo.com",
+          id_user: "lead_a",
+          timestamp: new Date(
+            AGORA_FIXO.getTime() - 3650 * 1000,
+          ).toISOString(),
+          nome_roleta: "roleta_a",
+        }],
+      });
+      const roleta = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes,
+        id_roleta: "recencia_sem_historico_maior_que_uma_hora",
+        ordenacao_por_recencia: true,
+        agora: () => AGORA_FIXO,
+      });
+
+      const result = await roleta.girar();
+      assertEquals(result, atendentes[1]);
+    },
+  );
+
   await t.step("aplica peso no tempo sem lead", async () => {
     const atendentes: RoletaAtendente[] = [
       { nome: "A", email: "a@exemplo.com" },
@@ -293,6 +326,37 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
       microapp: mapp,
       atendentes,
       id_roleta: "recencia_peso",
+      ordenacao_por_recencia: true,
+      config_atendentes: {
+        "a@exemplo.com": { peso: 2 },
+      },
+      agora: () => AGORA_FIXO,
+    });
+
+    const result = await roleta.girar();
+    assertEquals(result, atendentes[0]);
+  });
+
+  await t.step("peso alto pode passar atendente sem historico", async () => {
+    const atendentes: RoletaAtendente[] = [
+      { nome: "A", email: "a@exemplo.com" },
+      { nome: "B", email: "b@exemplo.com" },
+    ];
+
+    const mapp = new TesteRoleta();
+    await mapp.infosConta.set({
+      chave: CHAVE_HISTORICO_ATENDENTES,
+      conteudo: [{
+        atendente_email: "a@exemplo.com",
+        id_user: "lead_a",
+        timestamp: new Date(AGORA_FIXO.getTime() - 3650 * 1000).toISOString(),
+        nome_roleta: "roleta_a",
+      }],
+    });
+    const roleta = new RoletaChatwoot({
+      microapp: mapp,
+      atendentes,
+      id_roleta: "recencia_peso_alto_com_historico",
       ordenacao_por_recencia: true,
       config_atendentes: {
         "a@exemplo.com": { peso: 2 },
