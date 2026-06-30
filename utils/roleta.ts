@@ -19,6 +19,8 @@ type RoletaConfigAtendente = {
 };
 
 const TEMPO_SEM_LEAD_PADRAO_SEGUNDOS = 60 * 60;
+const JANELA_ONLINE_PADRAO_MINUTOS = 10;
+const CHAVE_ULTIMA_ATIVIDADE_ATENDENTES = "ultima_atividade_atendentes";
 
 export class RoletaChatwoot {
   public motivoEscolha?: "only_one" | "next" | "next_online" | "next_fallback";
@@ -31,6 +33,8 @@ export class RoletaChatwoot {
       atendentes?: readonly RoletaAtendente[];
       somente_atendentes_online?: boolean;
       ordenacao_por_recencia?: boolean;
+      priorizar_corretores_online?: boolean;
+      janela_online_minutos?: number;
       config_atendentes?: Record<string, RoletaConfigAtendente>;
       agora?: () => Date;
     },
@@ -324,6 +328,40 @@ export class RoletaChatwoot {
     atendentes: RoletaAtendente[],
   ): Promise<RoletaAtendente> {
     const microapp = this.options.microapp;
+    const atendentesOriginais = atendentes;
+    const agora = this.agora().getTime();
+
+    if (this.options.priorizar_corretores_online) {
+      const ultimaAtividade = await microapp.infosConta.get({
+        chave: CHAVE_ULTIMA_ATIVIDADE_ATENDENTES,
+      });
+      const janelaMinutos =
+        typeof this.options.janela_online_minutos === "number" &&
+          Number.isFinite(this.options.janela_online_minutos)
+          ? this.options.janela_online_minutos
+          : JANELA_ONLINE_PADRAO_MINUTOS;
+
+      if (
+        janelaMinutos > 0 && ultimaAtividade &&
+        typeof ultimaAtividade === "object" &&
+        !Array.isArray(ultimaAtividade)
+      ) {
+        const dentroDaJanela = atendentes.filter((atendente) => {
+          const timestamp = Date.parse(
+            String(ultimaAtividade[atendente.email.trim().toLowerCase()] ?? ""),
+          );
+          if (Number.isNaN(timestamp)) {
+            return true;
+          }
+          return (agora - timestamp) / 1000 / 60 <= janelaMinutos;
+        });
+
+        if (dentroDaJanela.length > 0) {
+          atendentes = dentroDaJanela;
+        }
+      }
+    }
+
     const historico = await microapp.infosConta.get({
       chave: this.chave_historico_atendentes(),
     });
@@ -332,7 +370,6 @@ export class RoletaChatwoot {
       )
       ? historico
       : [];
-    const agora = this.agora().getTime();
     const tempoSemLeadPorEmail: Record<string, number> = {};
 
     for (const atendente of atendentes) {
@@ -390,7 +427,9 @@ export class RoletaChatwoot {
       }
     }
 
-    this.motivoEscolha = "next";
+    this.motivoEscolha = atendentes.length < atendentesOriginais.length
+      ? "next_online"
+      : "next";
     await this.registrarHistoricoAtendente(
       historicoAtendentes,
       atendenteEscolhido,

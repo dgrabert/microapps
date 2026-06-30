@@ -237,6 +237,150 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
     );
   });
 
+  await t.step(
+    "prioriza atendentes com atividade recente quando configurado",
+    async () => {
+      const atendentes: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "B", email: "b@exemplo.com" },
+      ];
+
+      const mapp = new TesteRoleta();
+      await mapp.infosConta.set({
+        chave: CHAVE_HISTORICO_ATENDENTES,
+        conteudo: [
+          {
+            atendente_email: "a@exemplo.com",
+            id_user: "lead_a",
+            timestamp: minutosAntes(AGORA_FIXO, 60),
+            nome_roleta: "roleta_a",
+          },
+          {
+            atendente_email: "b@exemplo.com",
+            id_user: "lead_b",
+            timestamp: minutosAntes(AGORA_FIXO, 5),
+            nome_roleta: "roleta_b",
+          },
+        ],
+      });
+      await mapp.infosConta.set({
+        chave: "ultima_atividade_atendentes",
+        conteudo: {
+          "a@exemplo.com": minutosAntes(AGORA_FIXO, 20),
+          "b@exemplo.com": minutosAntes(AGORA_FIXO, 2),
+        },
+      });
+      const roleta = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes,
+        id_roleta: "recencia_online",
+        ordenacao_por_recencia: true,
+        priorizar_corretores_online: true,
+        janela_online_minutos: 10,
+        agora: () => AGORA_FIXO,
+      });
+
+      const result = await roleta.girar();
+      assertEquals(result, atendentes[1]);
+      assertEquals(roleta.motivoEscolha, "next_online");
+    },
+  );
+
+  await t.step(
+    "considera atendente sem registro de atividade como online",
+    async () => {
+      const atendentes: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "B", email: "b@exemplo.com" },
+      ];
+
+      const mapp = new TesteRoleta();
+      await mapp.infosConta.set({
+        chave: CHAVE_HISTORICO_ATENDENTES,
+        conteudo: [
+          {
+            atendente_email: "a@exemplo.com",
+            id_user: "lead_a",
+            timestamp: minutosAntes(AGORA_FIXO, 60),
+            nome_roleta: "roleta_a",
+          },
+          {
+            atendente_email: "b@exemplo.com",
+            id_user: "lead_b",
+            timestamp: minutosAntes(AGORA_FIXO, 5),
+            nome_roleta: "roleta_b",
+          },
+        ],
+      });
+      await mapp.infosConta.set({
+        chave: "ultima_atividade_atendentes",
+        conteudo: { "a@exemplo.com": minutosAntes(AGORA_FIXO, 20) },
+      });
+      const roleta = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes,
+        id_roleta: "recencia_online_desconhecido",
+        ordenacao_por_recencia: true,
+        priorizar_corretores_online: true,
+        janela_online_minutos: 10,
+        agora: () => AGORA_FIXO,
+      });
+
+      const result = await roleta.girar();
+      assertEquals(result, atendentes[1]);
+      assertEquals(roleta.motivoEscolha, "next_online");
+    },
+  );
+
+  await t.step(
+    "usa recencia normal quando nenhum atendente esta dentro da janela",
+    async () => {
+      const atendentes: RoletaAtendente[] = [
+        { nome: "A", email: "a@exemplo.com" },
+        { nome: "B", email: "b@exemplo.com" },
+      ];
+
+      const mapp = new TesteRoleta();
+      await mapp.infosConta.set({
+        chave: CHAVE_HISTORICO_ATENDENTES,
+        conteudo: [
+          {
+            atendente_email: "a@exemplo.com",
+            id_user: "lead_a",
+            timestamp: minutosAntes(AGORA_FIXO, 60),
+            nome_roleta: "roleta_a",
+          },
+          {
+            atendente_email: "b@exemplo.com",
+            id_user: "lead_b",
+            timestamp: minutosAntes(AGORA_FIXO, 5),
+            nome_roleta: "roleta_b",
+          },
+        ],
+      });
+      await mapp.infosConta.set({
+        chave: "ultima_atividade_atendentes",
+        conteudo: {
+          "a@exemplo.com": minutosAntes(AGORA_FIXO, 20),
+          "b@exemplo.com": minutosAntes(AGORA_FIXO, 15),
+        },
+      });
+      const roleta = new RoletaChatwoot({
+        microapp: mapp,
+        atendentes,
+        id_roleta: "recencia_online_fallback",
+        ordenacao_por_recencia: true,
+        priorizar_corretores_online: true,
+        janela_online_minutos: 10,
+        agora: () => AGORA_FIXO,
+      });
+
+      const result = await roleta.girar();
+      assertEquals(result, atendentes[0]);
+      assertEquals(roleta.motivoEscolha, "next");
+    },
+  );
+
   await t.step("escolhe atendente sem historico primeiro", async () => {
     const atendentes: RoletaAtendente[] = [
       { nome: "A", email: "a@exemplo.com" },
