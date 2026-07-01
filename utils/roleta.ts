@@ -20,7 +20,6 @@ type RoletaConfigAtendente = {
 
 const TEMPO_SEM_LEAD_PADRAO_SEGUNDOS = 60 * 60;
 const JANELA_ONLINE_PADRAO_MINUTOS = 10;
-const CHAVE_ULTIMA_ATIVIDADE_ATENDENTES = "ultima_atividade_atendentes";
 
 export class RoletaChatwoot {
   public motivoEscolha?: "only_one" | "next" | "next_online" | "next_fallback";
@@ -332,26 +331,26 @@ export class RoletaChatwoot {
     const agora = this.agora().getTime();
 
     if (this.options.priorizar_corretores_online) {
-      const ultimaAtividade = await microapp.infosConta.get({
-        chave: CHAVE_ULTIMA_ATIVIDADE_ATENDENTES,
-      });
+      const agents = await microapp.interface_chatwoot.list_agents();
+      const lastPresenceByEmail = new Map(
+        agents.map((agent) => [
+          agent.email.trim().toLowerCase(),
+          agent.last_presence_at,
+        ]),
+      );
       const janelaMinutos =
         typeof this.options.janela_online_minutos === "number" &&
           Number.isFinite(this.options.janela_online_minutos)
           ? this.options.janela_online_minutos
           : JANELA_ONLINE_PADRAO_MINUTOS;
 
-      if (
-        janelaMinutos > 0 && ultimaAtividade &&
-        typeof ultimaAtividade === "object" &&
-        !Array.isArray(ultimaAtividade)
-      ) {
+      if (janelaMinutos > 0) {
         const dentroDaJanela = atendentes.filter((atendente) => {
           const timestamp = Date.parse(
-            String(ultimaAtividade[atendente.email.trim().toLowerCase()] ?? ""),
+            String(lastPresenceByEmail.get(atendente.email.trim().toLowerCase()) ?? ""),
           );
           if (Number.isNaN(timestamp)) {
-            return true;
+            return false;
           }
           return (agora - timestamp) / 1000 / 60 <= janelaMinutos;
         });

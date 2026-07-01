@@ -82,6 +82,7 @@ Deno.test("RoletaChatwoot.girar", async (t) => {
         account_id: 1,
         availability_status: "online",
         auto_offline: false,
+        last_presence_at: "2026-01-01T00:00:00Z",
         confirmed: true,
         email: "b@exemplo.com",
         available_name: "B",
@@ -263,13 +264,34 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
           },
         ],
       });
-      await mapp.infosConta.set({
-        chave: "ultima_atividade_atendentes",
-        conteudo: {
-          "a@exemplo.com": minutosAntes(AGORA_FIXO, 20),
-          "b@exemplo.com": minutosAntes(AGORA_FIXO, 2),
+      mapp.interface_chatwoot.agents = [
+        {
+          id: 1,
+          account_id: 1,
+          availability_status: "online",
+          auto_offline: false,
+          last_presence_at: minutosAntes(AGORA_FIXO, 20),
+          confirmed: true,
+          email: "a@exemplo.com",
+          available_name: "A",
+          name: "A",
+          role: "agent",
+          thumbnail: "",
         },
-      });
+        {
+          id: 2,
+          account_id: 1,
+          availability_status: "online",
+          auto_offline: false,
+          last_presence_at: minutosAntes(AGORA_FIXO, 2),
+          confirmed: true,
+          email: "b@exemplo.com",
+          available_name: "B",
+          name: "B",
+          role: "agent",
+          thumbnail: "",
+        },
+      ];
       const roleta = new RoletaChatwoot({
         microapp: mapp,
         atendentes,
@@ -287,7 +309,7 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
   );
 
   await t.step(
-    "considera atendente sem registro de atividade como online",
+    "ignora atendente sem last_presence_at como online",
     async () => {
       const atendentes: RoletaAtendente[] = [
         { nome: "A", email: "a@exemplo.com" },
@@ -312,10 +334,21 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
           },
         ],
       });
-      await mapp.infosConta.set({
-        chave: "ultima_atividade_atendentes",
-        conteudo: { "a@exemplo.com": minutosAntes(AGORA_FIXO, 20) },
-      });
+      mapp.interface_chatwoot.agents = [
+        {
+          id: 1,
+          account_id: 1,
+          availability_status: "online",
+          auto_offline: false,
+          last_presence_at: minutosAntes(AGORA_FIXO, 20),
+          confirmed: true,
+          email: "a@exemplo.com",
+          available_name: "A",
+          name: "A",
+          role: "agent",
+          thumbnail: "",
+        },
+      ];
       const roleta = new RoletaChatwoot({
         microapp: mapp,
         atendentes,
@@ -327,8 +360,8 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
       });
 
       const result = await roleta.girar();
-      assertEquals(result, atendentes[1]);
-      assertEquals(roleta.motivoEscolha, "next_online");
+      assertEquals(result, atendentes[0]);
+      assertEquals(roleta.motivoEscolha, "next");
     },
   );
 
@@ -358,13 +391,34 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
           },
         ],
       });
-      await mapp.infosConta.set({
-        chave: "ultima_atividade_atendentes",
-        conteudo: {
-          "a@exemplo.com": minutosAntes(AGORA_FIXO, 20),
-          "b@exemplo.com": minutosAntes(AGORA_FIXO, 15),
+      mapp.interface_chatwoot.agents = [
+        {
+          id: 1,
+          account_id: 1,
+          availability_status: "online",
+          auto_offline: false,
+          last_presence_at: minutosAntes(AGORA_FIXO, 20),
+          confirmed: true,
+          email: "a@exemplo.com",
+          available_name: "A",
+          name: "A",
+          role: "agent",
+          thumbnail: "",
         },
-      });
+        {
+          id: 2,
+          account_id: 1,
+          availability_status: "online",
+          auto_offline: false,
+          last_presence_at: minutosAntes(AGORA_FIXO, 15),
+          confirmed: true,
+          email: "b@exemplo.com",
+          available_name: "B",
+          name: "B",
+          role: "agent",
+          thumbnail: "",
+        },
+      ];
       const roleta = new RoletaChatwoot({
         microapp: mapp,
         atendentes,
@@ -910,6 +964,7 @@ Deno.test("RoletaChatwoot.girar com ordenacao_por_recencia", async (t) => {
         account_id: 1,
         availability_status: "online",
         auto_offline: false,
+        last_presence_at: "2026-01-01T00:00:00Z",
         confirmed: true,
         email: "b@exemplo.com",
         available_name: "B",
@@ -996,6 +1051,7 @@ Deno.test("RoletaChatwoot.associar_usuario", async (t) => {
         account_id: 1,
         availability_status: "online",
         auto_offline: false,
+        last_presence_at: "2026-01-01T00:00:00Z",
         confirmed: true,
         email: "a@exemplo.com",
         available_name: "A",
@@ -1008,6 +1064,7 @@ Deno.test("RoletaChatwoot.associar_usuario", async (t) => {
         account_id: 1,
         availability_status: "online",
         auto_offline: false,
+        last_presence_at: "2026-01-01T00:00:00Z",
         confirmed: true,
         email: "b@exemplo.com",
         available_name: "B",

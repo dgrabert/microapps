@@ -169,6 +169,7 @@ export type AgentInfo = {
   account_id: number;
   availability_status: "online" | "offline";
   auto_offline: boolean;
+  last_presence_at: string | null;
   confirmed: boolean;
   email: string;
   available_name: string;
@@ -379,6 +380,11 @@ export class ChatWootInterface extends ChatInterface {
   get_team_members(p: { team_id: number }): Promise<TeamMember[]> {
     console.log(`simulando get_team_members: ${JSON.stringify(p)}`);
     return Promise.resolve(this.team_members[p.team_id] ?? []);
+  }
+
+  list_agents(): Promise<AgentInfo[]> {
+    console.log(`simulando list_agents`);
+    return Promise.resolve(this.agents);
   }
 
   unassign_conversation(

@@ -240,6 +240,7 @@ Deno.test("ChatWootInterface mocka atendimento, labels, notas e status", async (
     account_id: 1,
     availability_status: "online",
     auto_offline: false,
+    last_presence_at: "2026-01-01T00:00:00Z",
     confirmed: true,
     email: "ana@exemplo.com",
     available_name: "Ana",
