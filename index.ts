@@ -32,6 +32,9 @@ export type {
 export type { Etapa } from "./fluxo.ts";
 export type {
   AgentInfo,
+  ChatWootConversationStatus,
+  ChatWootConversationSummary,
+  ChatWootConversationTarget,
   ChatWootAssignee,
   ConversationInfo,
   ConversationMeta,

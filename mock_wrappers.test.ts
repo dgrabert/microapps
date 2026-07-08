@@ -1,4 +1,4 @@
-import { assertEquals, assertInstanceOf } from "jsr:@std/assert";
+import { assertEquals, assertInstanceOf, assertRejects } from "jsr:@std/assert";
 import { GestorArquivos } from "./arquivos.ts";
 import {
   BitrixCRM,
@@ -266,7 +266,7 @@ Deno.test("ChatWootInterface mocka atendimento, labels, notas e status", async (
     await chatwoot.assign_team({ id_user: "u", team_destination: "vendas" }),
     true,
   );
-  await chatwoot.add_label({ id_user: "u", label: "Lead Quente" });
+  await chatwoot.add_label({ id_user: "u", label: "Prioridade Alta" });
   await chatwoot.send_private_note({ id_user: "u", content: "nota" });
   await chatwoot.send_template({
     template: new TemplateMessage("tpl"),
@@ -276,18 +276,43 @@ Deno.test("ChatWootInterface mocka atendimento, labels, notas e status", async (
     id_user: "u",
     status: "resolved",
   });
+  await chatwoot.toggle_conversation_status({
+    conversation_id: 1,
+    status: "snoozed",
+    snoozed_until: 1_757_506_877,
+  });
 
   assertEquals(
-    (await chatwoot.get_atendente({ id_user: "u" }))?.email,
+    (await chatwoot.get_atendente({ conversation_id: 1 }))?.email,
     "ana@exemplo.com",
   );
   assertEquals(
     (await chatwoot.get_conversation_details({ id_user: "u" })).labels,
-    ["lead_quente"],
+    ["prioridade_alta"],
   );
   assertEquals(chatwoot.notas_privadas.length, 1);
   assertEquals(chatwoot.templates_enviados.length, 1);
-  assertEquals(chatwoot.conversation_info.status, "resolved");
+  assertEquals(chatwoot.conversation_info.status, "snoozed");
+  assertEquals(chatwoot.conversation_info.snoozed_until, 1_757_506_877);
+  assertEquals(await chatwoot.get_user_conversations({ id_user: "u" }), [
+    { id: 1, inbox_id: 1, status: "snoozed", snoozed_until: 1_757_506_877 },
+  ]);
+  assertEquals(
+    await chatwoot.get_user_conversations({ id_user: "u", statuses: ["open"] }),
+    [],
+  );
+  await assertRejects(async () => {
+    await chatwoot.add_label(
+      { id_user: "u", conversation_id: 1, label: "x" } as any,
+    );
+  });
+  await assertRejects(async () => {
+    await chatwoot.toggle_conversation_status({
+      id_user: "u",
+      status: "open",
+      snoozed_until: 1_757_506_877,
+    });
+  });
 });
 
 Deno.test("ControladorFluxo mocka mudanca de etapa", async () => {

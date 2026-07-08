@@ -3,7 +3,7 @@
 ## Instalacao
 
 ```typescript
-import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.35.0";
+import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.37.0";
 ```
 
 ---
@@ -25,7 +25,7 @@ import {
     ApiRequest,
     ApiResponse,
     MicroApp,
-} from "jsr:@virti/microapp-sdk@0.35.0";
+} from "jsr:@virti/microapp-sdk@0.37.0";
 ```
 
 ### Rota no backend
@@ -198,6 +198,57 @@ export default class TasksBoard extends MicroApp {
 ```
 
 O backend permite no maximo uma troca `asUser` por request, para evitar loop.
+
+### Chatwoot: `id_user` e `conversation_id`
+
+Nos wrappers do Chatwoot, `id_user` identifica o usuário. Quando um método precisa escolher uma conversa a partir de `id_user`, o backend tenta usar a conversa corrente/mais recente conhecida para esse usuário, normalmente a conversa onde houve a última interação registrada pelo Chatwoot.
+
+A resolução usa o estado interno salvo pelos webhooks do Chatwoot. Se não houver uma conversa direta salva, o backend tenta outras fontes em ordem: inbox salva, última mensagem local com metadados Chatwoot, busca por telefone priorizando status `open`, depois `pending`, depois `resolved`, e por fim uma inbox válida do robô.
+
+Para operar diretamente em uma conversa específica, use `conversation_id` nos métodos que aceitam alvo de conversa. Envie `id_user` ou `conversation_id`, nunca os dois. Se os dois forem enviados, o backend retorna erro por ambiguidade.
+
+Métodos que aceitam `conversation_id`:
+
+- `interface_chatwoot.get_atendente`
+- `interface_chatwoot.send_to_human`
+- `interface_chatwoot.assign_agent`
+- `interface_chatwoot.assign_team`
+- `interface_chatwoot.unassign_conversation`
+- `interface_chatwoot.add_label`
+- `interface_chatwoot.set_labels`
+- `interface_chatwoot.send_private_note`
+- `interface_chatwoot.get_conversation_details`
+- `interface_chatwoot.toggle_conversation_status`
+
+`send_message` e `send_template` continuam usando `id_user`, porque dependem do contato/canal de envio.
+
+Exemplo:
+
+```typescript
+await this.interface_chatwoot.add_label({
+    conversation_id: 12345,
+    label: "prioridade_alta",
+});
+
+await this.interface_chatwoot.toggle_conversation_status({
+    conversation_id: 12345,
+    status: "snoozed",
+    snoozed_until: 1757506877,
+});
+```
+
+`status: "snoozed"` pode receber `snoozed_until` em timestamp Unix, em segundos. Se `snoozed_until` for omitido, o Chatwoot suspende a conversa até a próxima resposta do usuário.
+
+Para descobrir outras conversas do mesmo usuário, use `get_user_conversations`:
+
+```typescript
+const conversas = await this.interface_chatwoot.get_user_conversations({
+    id_user: "chatwoot_5511999999999",
+    statuses: ["open", "pending", "snoozed"],
+});
+```
+
+Essa função retorna apenas conversas em inboxes Chatwoot vinculadas ao robô atual. Use os `id` retornados como `conversation_id` se precisar atualizar uma conversa específica.
 
 ### Auth Portal
 

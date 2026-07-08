@@ -43,7 +43,7 @@ export class MicroApp {
   utils: MicroAppUtils;
   microapp_manager: MicroappManager;
 
-  static __version__ = [0, 35, 0];
+  static __version__ = [0, 37, 0];
 
   static __pipeline__: Record<string, Record<string, any>> = {
     preprocessing: {},

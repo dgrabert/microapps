@@ -211,6 +211,23 @@ export type ConversationInfo = {
   waiting_since: number;
 };
 
+export type ChatWootConversationStatus =
+  | "open"
+  | "resolved"
+  | "pending"
+  | "snoozed";
+
+export type ChatWootConversationTarget =
+  | { id_user: string; conversation_id?: never }
+  | { id_user?: never; conversation_id: number };
+
+export type ChatWootConversationSummary = {
+  id: number;
+  inbox_id: number;
+  status: ChatWootConversationStatus | string;
+  snoozed_until?: number | null;
+};
+
 @wrapper
 export class ChatWootInterface extends ChatInterface {
   agents: AgentInfo[] = [];
@@ -222,7 +239,7 @@ export class ChatWootInterface extends ChatInterface {
   templates_enviados_numero: Array<
     { template: TemplateMessage; phone_number: string; inbox_id?: number }
   > = [];
-  notas_privadas: Array<{ id_user: string; content: string }> = [];
+  notas_privadas: Array<ChatWootConversationTarget & { content: string }> = [];
   conversation_info: ConversationInfo = {
     meta: { channel: "Channel::Api" },
     id: 1,
@@ -245,7 +262,10 @@ export class ChatWootInterface extends ChatInterface {
     waiting_since: 0,
   };
 
-  get_atendente(p: { id_user: string }): Promise<ChatWootAssignee | null> {
+  get_atendente(
+    p: ChatWootConversationTarget,
+  ): Promise<ChatWootAssignee | null> {
+    this.validateConversationTarget(p);
     console.log(`simulando get_atendente: ${JSON.stringify(p)}`);
     return Promise.resolve(this.conversation_info.meta.assignee ?? null);
   }
@@ -288,10 +308,18 @@ export class ChatWootInterface extends ChatInterface {
 
   send_to_human(p: {
     id_user: string;
+    conversation_id?: never;
+    team_destination?: string;
+    person_destination?: string;
+    assign_to_person_team?: boolean;
+  } | {
+    id_user?: never;
+    conversation_id: number;
     team_destination?: string;
     person_destination?: string;
     assign_to_person_team?: boolean;
   }): Promise<Record<string, unknown> | null> {
+    this.validateConversationTarget(p);
     console.log(`simulando send_to_human: ${JSON.stringify(p)}`);
     if (!p.team_destination && !p.person_destination) {
       throw new Error("Sem time ou pessoa de destino");
@@ -317,8 +345,14 @@ export class ChatWootInterface extends ChatInterface {
 
   assign_agent(p: {
     id_user: string;
+    conversation_id?: never;
+    person_destination: string;
+  } | {
+    id_user?: never;
+    conversation_id: number;
     person_destination: string;
   }): Promise<boolean | null> {
+    this.validateConversationTarget(p);
     console.log(`simulando assign_agent: ${JSON.stringify(p)}`);
     const assignee = this.findAgentByNameOrEmail(p.person_destination);
     if (!assignee) {
@@ -330,8 +364,14 @@ export class ChatWootInterface extends ChatInterface {
 
   assign_team(p: {
     id_user: string;
+    conversation_id?: never;
+    team_destination: string;
+  } | {
+    id_user?: never;
+    conversation_id: number;
     team_destination: string;
   }): Promise<boolean | null> {
+    this.validateConversationTarget(p);
     console.log(`simulando assign_team: ${JSON.stringify(p)}`);
     if (!this.findTeamByName(p.team_destination)) {
       return Promise.resolve(null);
@@ -344,7 +384,8 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve(true);
   }
 
-  add_label(p: { id_user: string; label: string }): Promise<void> {
+  add_label(p: ChatWootConversationTarget & { label: string }): Promise<void> {
+    this.validateConversationTarget(p);
     console.log(`simulando add_label: ${JSON.stringify(p)}`);
     const label = this.normalizeLabel(p.label);
     if (label && !this.conversation_info.labels.includes(label)) {
@@ -353,7 +394,10 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve();
   }
 
-  set_labels(p: { id_user: string; labels: string[] }): Promise<void> {
+  set_labels(
+    p: ChatWootConversationTarget & { labels: string[] },
+  ): Promise<void> {
+    this.validateConversationTarget(p);
     console.log(`simulando set_labels: ${JSON.stringify(p)}`);
     const labels: string[] = [];
     for (const label of p.labels) {
@@ -366,7 +410,10 @@ export class ChatWootInterface extends ChatInterface {
     return Promise.resolve();
   }
 
-  send_private_note(p: { id_user: string; content: string }): Promise<void> {
+  send_private_note(
+    p: ChatWootConversationTarget & { content: string },
+  ): Promise<void> {
+    this.validateConversationTarget(p);
     console.log(`simulando send_private_note: ${JSON.stringify(p)}`);
     this.notas_privadas.push(p);
     return Promise.resolve();
@@ -388,8 +435,9 @@ export class ChatWootInterface extends ChatInterface {
   }
 
   unassign_conversation(
-    p: { id_user: string; assignee: boolean; team: boolean },
+    p: ChatWootConversationTarget & { assignee: boolean; team: boolean },
   ): Promise<void> {
+    this.validateConversationTarget(p);
     console.log(`simulando unassign_conversation: ${JSON.stringify(p)}`);
     if (p.assignee) {
       delete this.conversation_info.meta.assignee;
@@ -407,16 +455,66 @@ export class ChatWootInterface extends ChatInterface {
     );
   }
 
-  get_conversation_details(_p: { id_user: string }): Promise<ConversationInfo> {
+  get_conversation_details(
+    p: ChatWootConversationTarget,
+  ): Promise<ConversationInfo> {
+    this.validateConversationTarget(p);
     return Promise.resolve(this.conversation_info);
   }
 
   toggle_conversation_status(
-    p: { id_user: string; status: "open" | "resolved" | "pending" | "snoozed" },
+    p: ChatWootConversationTarget & {
+      status: ChatWootConversationStatus;
+      snoozed_until?: number;
+    },
   ): Promise<void> {
+    this.validateConversationTarget(p);
     console.log(`simulando toggle_conversation: ${JSON.stringify(p)}`);
+    if (p.snoozed_until !== undefined && p.status !== "snoozed") {
+      throw new Error("snoozed_until só pode ser usado com status snoozed");
+    }
     this.conversation_info.status = p.status;
+    this.conversation_info.snoozed_until = p.snoozed_until ?? null;
     return Promise.resolve();
+  }
+
+  get_user_conversations(p: {
+    id_user: string;
+    statuses?: ChatWootConversationStatus[];
+  }): Promise<ChatWootConversationSummary[]> {
+    console.log(`simulando get_user_conversations: ${JSON.stringify(p)}`);
+    const conversations = [this.conversation_info];
+    return Promise.resolve(
+      conversations
+        .filter((conversation) =>
+          !p.statuses || p.statuses.includes(
+            conversation.status as ChatWootConversationStatus,
+          )
+        )
+        .map((conversation) => ({
+          id: conversation.id,
+          inbox_id: conversation.inbox_id,
+          status: conversation.status,
+          snoozed_until: conversation.snoozed_until,
+        })),
+    );
+  }
+
+  private validateConversationTarget(p: {
+    id_user?: string;
+    conversation_id?: number;
+  }): void {
+    const hasIdUser = p.id_user !== undefined;
+    const hasConversationId = p.conversation_id !== undefined;
+    if (hasIdUser === hasConversationId) {
+      throw new Error("Informe id_user ou conversation_id, mas não ambos.");
+    }
+    if (hasIdUser && !p.id_user?.trim()) {
+      throw new Error("id_user inválido.");
+    }
+    if (hasConversationId && !Number.isInteger(p.conversation_id)) {
+      throw new Error("conversation_id inválido.");
+    }
   }
 
   private findAgentByNameOrEmail(destination: string): ChatWootAssignee | null {
