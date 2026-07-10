@@ -1,4 +1,5 @@
 import { wrapper } from "./decorators.ts";
+import type { Anexo, TipoArquivo } from "./arquivos.ts";
 
 export type Mensagem = {
   origem: string;
@@ -86,6 +87,51 @@ export class Conversa {
       return true;
     });
     return Promise.resolve(mensagem?.conteudo.texto ?? "");
+  }
+
+  /**
+   * Lista os anexos (arquivos) presentes na conversa, já resolvidos como
+   * {@link Anexo} (key, nome, tipo, mimetype, tamanho). Por padrão traz só os
+   * enviados pelo cliente. No backend, ignora mídias de base de conhecimento
+   * (que carregam IDs internos); no mock, deriva de `this.mensagens`.
+   */
+  anexos(
+    params: {
+      origem?: "cliente" | "robo" | "humano" | "todos";
+      tipo?: TipoArquivo;
+    } = {},
+  ): Promise<Anexo[]> {
+    const origem = params.origem ?? "cliente";
+    const out: Anexo[] = [];
+    for (const m of this.mensagens) {
+      if (m.tipo === "debug") continue;
+      const key = m.conteudo?.midia;
+      if (!key) continue;
+      if (origem !== "todos" && m.origem !== origem) continue;
+      const nome = (key.split(/[\\/]/).pop() || key).replace(
+        /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}-/,
+        "",
+      );
+      const ext = nome.includes(".")
+        ? nome.split(".").pop()!.toLowerCase()
+        : "";
+      const tipo: TipoArquivo = ["png", "jpg", "jpeg", "gif", "webp"].includes(ext)
+        ? "imagem"
+        : ["mp3", "ogg", "wav", "m4a"].includes(ext)
+        ? "audio"
+        : ["mp4", "mov", "webm"].includes(ext)
+        ? "video"
+        : "documento";
+      if (params.tipo && tipo !== params.tipo) continue;
+      out.push({
+        key,
+        nome,
+        tipo,
+        origem: m.origem as Anexo["origem"],
+        timestamp: m.timestamp,
+      });
+    }
+    return Promise.resolve(out);
   }
 
   append(params: { mensagem: Mensagem }): Promise<void> {

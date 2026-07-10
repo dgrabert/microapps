@@ -1,4 +1,7 @@
 export { MicroApp } from "./base.ts";
+export { GestorArquivos } from "./arquivos.ts";
+export type { Anexo, TipoArquivo } from "./arquivos.ts";
+export { Arquivos, inferirMimetype, inferirTipoArquivo } from "./arquivos_facade.ts";
 export { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 export {
   aiFunction,

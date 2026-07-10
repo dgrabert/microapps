@@ -1,4 +1,5 @@
 import { GestorArquivos } from "./arquivos.ts";
+import { Arquivos } from "./arquivos_facade.ts";
 import { ControladorFluxo } from "./fluxo.ts";
 import { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 import {
@@ -30,6 +31,7 @@ export class MicroApp {
   fluxo: ControladorFluxo;
   prompt: PromptNode;
   gestor_arquivos: GestorArquivos;
+  arquivos: Arquivos;
   conversa: Conversa;
   interface_livechat: LivechatInterface;
   interface_whatsapp: WhatsappInterface;
@@ -43,7 +45,7 @@ export class MicroApp {
   utils: MicroAppUtils;
   microapp_manager: MicroappManager;
 
-  static __version__ = [0, 37, 0];
+  static __version__ = [0, 38, 0];
 
   static __pipeline__: Record<string, Record<string, any>> = {
     preprocessing: {},
@@ -110,6 +112,7 @@ export class MicroApp {
     this.prompt = new PromptNode("Mock Root");
     this.gestor_arquivos = new GestorArquivos();
     this.conversa = new Conversa();
+    this.arquivos = new Arquivos(this.gestor_arquivos, this.conversa);
     this.interface_livechat = new LivechatInterface();
     this.interface_whatsapp = new WhatsappInterface();
     this.interface_chatwoot = new ChatWootInterface();
