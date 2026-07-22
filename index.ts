@@ -1,7 +1,11 @@
 export { MicroApp } from "./base.ts";
 export { GestorArquivos } from "./arquivos.ts";
 export type { Anexo, TipoArquivo } from "./arquivos.ts";
-export { Arquivos, inferirMimetype, inferirTipoArquivo } from "./arquivos_facade.ts";
+export {
+  Arquivos,
+  inferirMimetype,
+  inferirTipoArquivo,
+} from "./arquivos_facade.ts";
 export { InfosConta, InfosRobo, InfosUser } from "./infosUser.ts";
 export {
   aiFunction,
@@ -13,12 +17,7 @@ export {
   preprocessing,
   wrapperMethod,
 } from "./decorators.ts";
-export {
-  ApiHeaders,
-  ApiQuery,
-  ApiRequest,
-  ApiResponse,
-} from "./api.ts";
+export { ApiHeaders, ApiQuery, ApiRequest, ApiResponse } from "./api.ts";
 export type {
   ApiAuth,
   ApiDecoratorConfig,
@@ -35,10 +34,10 @@ export type {
 export type { Etapa } from "./fluxo.ts";
 export type {
   AgentInfo,
+  ChatWootAssignee,
   ChatWootConversationStatus,
   ChatWootConversationSummary,
   ChatWootConversationTarget,
-  ChatWootAssignee,
   ConversationInfo,
   ConversationMeta,
   Team,
@@ -93,3 +92,4 @@ export {
 } from "./portalApi.ts";
 export { MicroAppUtils } from "./utils.ts";
 export { MicroappManager } from "./microapp_manager.ts";
+export { SDK_VERSION, SDK_VERSION_TUPLE } from "./version.ts";

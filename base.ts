@@ -20,6 +20,7 @@ import { CRM } from "./crm.ts";
 import { PortalAPI } from "./portalApi.ts";
 import { MicroAppUtils } from "./utils.ts";
 import { MicroappManager } from "./microapp_manager.ts";
+import { SDK_VERSION_TUPLE } from "./version.ts";
 
 export class MicroApp {
   llm: GPT;
@@ -45,7 +46,7 @@ export class MicroApp {
   utils: MicroAppUtils;
   microapp_manager: MicroappManager;
 
-  static __version__ = [0, 38, 0];
+  static __version__ = SDK_VERSION_TUPLE;
 
   static __pipeline__: Record<string, Record<string, any>> = {
     preprocessing: {},

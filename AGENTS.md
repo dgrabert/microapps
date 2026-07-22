@@ -12,8 +12,7 @@
 ## Release do SDK
 
 - Antes de publicar uma nova versão, conferir a última versão publicada/tag existente.
-- Atualizar `deno.json` para a nova versão do pacote.
-- Atualizar `MicroApp.__version__` em `base.ts` para a mesma versão em formato de array, porque o backend usa esse valor como `sdk_version`.
+- Atualizar apenas `deno.json` para a nova versão do pacote. `MicroApp.__version__` deriva automaticamente desse manifesto via `version.ts`; nunca duplicar a versão em código.
 - Atualizar imports versionados do README público para a nova versão.
 - Rodar os testes do SDK antes de criar tag/publicar.
 - Não rodar `release.sh`, criar tags, publicar no JSR ou fazer push sem pedido explícito.

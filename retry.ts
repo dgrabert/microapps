@@ -1,4 +1,4 @@
-import type { MicroApp } from "@virti/microapp-sdk";
+import type { MicroApp } from "./base.ts";
 
 /**
  * Decorator de retry com backoff exponencial para métodos de MicroApps.
@@ -20,7 +20,10 @@ export function retry(p: {
   attempts: number;
   seconds: number;
   factor: number;
-}): (target: any, context: ClassMethodDecoratorContext) => (this: MicroApp, params?: Record<string, any>) => Promise<any> {
+}): (
+  target: any,
+  context: ClassMethodDecoratorContext,
+) => (this: MicroApp, params?: Record<string, any>) => Promise<any> {
   return function (target: any, context: ClassMethodDecoratorContext) {
     return async function (this: MicroApp, params?: Record<string, any>) {
       const chave = `retry-attempt-${target.name}-params-${
