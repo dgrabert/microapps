@@ -85,6 +85,12 @@ export class MicroappsAdapter {
   criar(_p: Record<string, any>): Promise<any> { return Promise.resolve(); }
   editar(_p: Record<string, any>): Promise<any> { return Promise.resolve(); }
   deletar(_p: Record<string, any>): Promise<any> { return Promise.resolve(); }
+  /** Publica um micro-app por ZIP (código-fonte em base64). */
+  publicar(_p: Record<string, any>): Promise<any> { return Promise.resolve(); }
+  /** Valida um ZIP de micro-app (base64) sem publicar. */
+  validar(_p: Record<string, any>): Promise<any> { return Promise.resolve(); }
+  /** Reporta deps/feats ativas no robô/fluxo atual (só booleans). */
+  capacidades(_p?: Record<string, any>): Promise<any> { return Promise.resolve(); }
 }
 
 @wrapper
