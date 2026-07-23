@@ -35,7 +35,8 @@ const _MIME_POR_EXT: Record<string, string> = {
   json: "application/json",
   zip: "application/zip",
   doc: "application/msword",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  docx:
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   xls: "application/vnd.ms-excel",
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 };
@@ -115,7 +116,9 @@ export class Arquivos {
     });
     const resp = await fetch(url);
     if (!resp.ok) {
-      throw new Error(`Falha ao baixar arquivo '${nome}' (HTTP ${resp.status}).`);
+      throw new Error(
+        `Falha ao baixar arquivo '${nome}' (HTTP ${resp.status}).`,
+      );
     }
     const bytes = new Uint8Array(await resp.arrayBuffer());
 
@@ -138,6 +141,7 @@ export class Arquivos {
     nome?: string;
     legenda?: string;
     tipo?: TipoArquivo;
+    metadados?: Record<string, unknown>;
     incluir_link?: boolean;
   }): Promise<Anexo & { url?: string }> {
     let key: string;
@@ -149,7 +153,9 @@ export class Arquivos {
       key = typeof params.arquivo === "string"
         ? params.arquivo
         : params.arquivo.key;
-      if (!nome && typeof params.arquivo !== "string") nome = params.arquivo.nome;
+      if (!nome && typeof params.arquivo !== "string") {
+        nome = params.arquivo.nome;
+      }
     } else {
       let dataB64: string;
       if (params.caminho !== undefined) {
@@ -182,6 +188,7 @@ export class Arquivos {
       mensagem: {
         origem: "robo",
         conteudo: { texto: params.legenda, midia: key },
+        metadados: params.metadados,
       },
     });
 

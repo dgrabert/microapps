@@ -3,7 +3,7 @@
 ## Instalacao
 
 ```typescript
-import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.39.1";
+import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.39.2";
 ```
 
 ---
@@ -25,7 +25,7 @@ import {
     ApiRequest,
     ApiResponse,
     MicroApp,
-} from "jsr:@virti/microapp-sdk@0.39.1";
+} from "jsr:@virti/microapp-sdk@0.39.2";
 ```
 
 ### Rota no backend

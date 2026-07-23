@@ -1,4 +1,4 @@
-import { MicroApp, preprocessing } from "jsr:@virti/microapp-sdk@0.39.1";
+import { MicroApp, preprocessing } from "jsr:@virti/microapp-sdk@0.39.2";
 
 export default class MicroAppComandos extends MicroApp {
   mensagem: string;

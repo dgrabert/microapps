@@ -1,7 +1,11 @@
 import { assertEquals, assertExists, assertRejects } from "jsr:@std/assert";
 import { GestorArquivos } from "./arquivos.ts";
 import { Conversa } from "./mensagens.ts";
-import { Arquivos, inferirMimetype, inferirTipoArquivo } from "./arquivos_facade.ts";
+import {
+  Arquivos,
+  inferirMimetype,
+  inferirTipoArquivo,
+} from "./arquivos_facade.ts";
 
 const UUID = "123e4567-e89b-12d3-a456-426614174000";
 
@@ -10,7 +14,10 @@ function novaConversaComAnexos(): Conversa {
   conversa.mensagens = [
     { origem: "cliente", conteudo: { texto: "oi" } },
     { origem: "cliente", conteudo: { midia: `imagem/${UUID}-foto.png` } },
-    { origem: "cliente", conteudo: { midia: `documento/${UUID}-contrato.pdf` } },
+    {
+      origem: "cliente",
+      conteudo: { midia: `documento/${UUID}-contrato.pdf` },
+    },
     { origem: "robo", conteudo: { midia: `documento/${UUID}-boleto.pdf` } },
     { origem: "cliente", conteudo: { midia: "x" }, tipo: "debug" },
   ];
@@ -63,6 +70,7 @@ Deno.test("Arquivos.enviar_ao_usuario: sobe (data), anexa na conversa e devolve 
     data: "ZGFkb3M=", // "dados" em base64
     nome: "relatorio.pdf",
     legenda: "Segue o relatório",
+    metadados: { transporte: { ptt: false }, contexto: "teste" },
     incluir_link: true,
   });
 
@@ -78,6 +86,10 @@ Deno.test("Arquivos.enviar_ao_usuario: sobe (data), anexa na conversa e devolve 
   assertEquals(msg.origem, "robo");
   assertEquals(msg.conteudo.midia, anexo.key);
   assertEquals(msg.conteudo.texto, "Segue o relatório");
+  assertEquals(msg.metadados, {
+    transporte: { ptt: false },
+    contexto: "teste",
+  });
 
   // Link presigned incluído
   assertExists(anexo.url);
