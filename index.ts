@@ -90,6 +90,7 @@ export {
   PortalAPI,
   RobosAdapter,
 } from "./portalApi.ts";
+export type { EnviarConversaParams } from "./portalApi.ts";
 export { MicroAppUtils } from "./utils.ts";
 export { MicroappManager } from "./microapp_manager.ts";
 export { SDK_VERSION, SDK_VERSION_TUPLE } from "./version.ts";

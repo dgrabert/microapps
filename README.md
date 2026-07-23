@@ -3,7 +3,7 @@
 ## Instalacao
 
 ```typescript
-import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.39.2";
+import { MicroApp, aiFunction, api, p, preprocessing, postprocessing, moderator } from "jsr:@virti/microapp-sdk@0.39.3";
 ```
 
 ---
@@ -25,7 +25,7 @@ import {
     ApiRequest,
     ApiResponse,
     MicroApp,
-} from "jsr:@virti/microapp-sdk@0.39.2";
+} from "jsr:@virti/microapp-sdk@0.39.3";
 ```
 
 ### Rota no backend
@@ -729,7 +729,7 @@ const resultado = await this.portalApi.banco_conhecimentos.pesquisar({
 |---|---|
 | `portalApi.robos` | listar, criar, editar, deletar, fluxo_buscar, fluxo_atualizar, fluxo_criar |
 | `portalApi.canais` | listar, criar, editar, deletar |
-| `portalApi.conversas` | listar, informacoes, historico, exportar_csv |
+| `portalApi.conversas` | listar, informacoes, historico, exportar_csv, enviar |
 | `portalApi.campanhas` | listar, criar, editar, deletar, templates |
 | `portalApi.integracoes` | listar, criar, editar, deletar, autenticar_rdstation |
 | `portalApi.fontes_dados` | listar, criar, editar, deletar, processar |

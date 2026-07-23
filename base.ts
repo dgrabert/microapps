@@ -22,6 +22,30 @@ import { MicroAppUtils } from "./utils.ts";
 import { MicroappManager } from "./microapp_manager.ts";
 import { SDK_VERSION_TUPLE } from "./version.ts";
 
+const BRIDGE_CONTEXT_IDS_KEY = Symbol.for(
+  "@virti/microapp-sdk.bridge-context-ids",
+);
+const LEGACY_CONTEXT_ID_MAX = 1_000_000;
+const bridgeGlobal = globalThis as any;
+if (!(bridgeGlobal[BRIDGE_CONTEXT_IDS_KEY] instanceof Set)) {
+  bridgeGlobal[BRIDGE_CONTEXT_IDS_KEY] = new Set();
+}
+
+const activeBridgeContextIds = bridgeGlobal[BRIDGE_CONTEXT_IDS_KEY] as Set<
+  number
+>;
+
+type BridgeCall = {
+  context_id: number;
+  reject: (reason?: unknown) => void;
+  resolve: (value: unknown) => void;
+};
+
+function randomSafeInteger(): number {
+  const values = crypto.getRandomValues(new Uint32Array(2));
+  return (values[0] & 0x1f_ffff) * 0x1_0000_0000 + values[1];
+}
+
 export class MicroApp {
   llm: GPT;
   vars: VarsUser;
@@ -57,11 +81,29 @@ export class MicroApp {
     api: {},
   };
 
-  static __calls__: {
-    context_id: number;
-    reject: any;
-    resolve: any;
-  }[] = [];
+  // O worker injeta um array por microapp; manter esse contrato entre versões.
+  static __calls__: BridgeCall[] = [];
+
+  static __next_call_id__(
+    calls: ReadonlyArray<Pick<BridgeCall, "context_id">> = MicroApp.__calls__,
+    generate: () => number = randomSafeInteger,
+  ): number {
+    let contextId: number;
+    do {
+      contextId = generate();
+    } while (
+      !Number.isSafeInteger(contextId) || contextId <= LEGACY_CONTEXT_ID_MAX ||
+      activeBridgeContextIds.has(contextId) ||
+      calls.some((call) => call.context_id === contextId)
+    );
+
+    activeBridgeContextIds.add(contextId);
+    return contextId;
+  }
+
+  static __release_call_id__(contextId: number): void {
+    activeBridgeContextIds.delete(contextId);
+  }
 
   static __bridge__ = {
     call: function (params: object) {},
@@ -74,30 +116,32 @@ export class MicroApp {
         message?: string;
       },
     ): any {
-      for (const call of MicroApp.__calls__) {
-        if (call.context_id !== params.context_id) {
-          continue;
-        }
-        if (params.type === "execution_result") {
-          if (params.error_message) {
-            call.reject(params.error_message);
-          } else {
-            // TODO: tratar tambem casos como array de objetos
-            const className = params.value?.__meta__?.name;
-            if (!className) {
-              call.resolve(params.value);
-              return;
-            }
+      if (params.type !== "execution_result") return;
 
-            try {
-              const obj = eval(`new ${className}()`);
-              Object.assign(obj, params.value);
-              call.resolve(obj);
-            } catch (_err) {
-              call.resolve(params.value);
-            }
-          }
-        }
+      const index = MicroApp.__calls__.findIndex((call) =>
+        call.context_id === params.context_id
+      );
+      if (index === -1) return;
+      const [call] = MicroApp.__calls__.splice(index, 1);
+      MicroApp.__release_call_id__(params.context_id);
+      if (params.error_message) {
+        call.reject(params.error_message);
+        return;
+      }
+
+      // TODO: tratar tambem casos como array de objetos
+      const className = params.value?.__meta__?.name;
+      if (!className) {
+        call.resolve(params.value);
+        return;
+      }
+
+      try {
+        const obj = eval(`new ${className}()`);
+        Object.assign(obj, params.value);
+        call.resolve(obj);
+      } catch (_err) {
+        call.resolve(params.value);
       }
     },
   };

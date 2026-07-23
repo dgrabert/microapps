@@ -7,12 +7,12 @@ export type ApiMethod =
   | "HEAD"
   | "OPTIONS";
 
-export type ApiAuth = "portal";
+export type ApiAuth = "public" | "portal";
 
 export type ApiDecoratorConfig = {
   path: string;
   methods?: ApiMethod[];
-  auth?: ApiAuth | string;
+  auth?: ApiAuth;
 };
 
 export type ApiRequestInit = {
@@ -192,7 +192,10 @@ export class ApiResponse {
     return new ApiResponse({
       type: "response",
       status: init.status,
-      headers: { "content-type": init.contentType ?? "application/json; charset=utf-8", ...(init.headers ?? {}) },
+      headers: {
+        "content-type": init.contentType ?? "application/json; charset=utf-8",
+        ...(init.headers ?? {}),
+      },
       bodyType: "json",
       body,
     });
@@ -202,7 +205,10 @@ export class ApiResponse {
     return new ApiResponse({
       type: "response",
       status: init.status,
-      headers: { "content-type": init.contentType ?? "text/plain; charset=utf-8", ...(init.headers ?? {}) },
+      headers: {
+        "content-type": init.contentType ?? "text/plain; charset=utf-8",
+        ...(init.headers ?? {}),
+      },
       bodyType: "text",
       body,
     });
@@ -217,12 +223,18 @@ export class ApiResponse {
     });
   }
 
-  static binary(body: Uint8Array | ArrayBuffer, init: ApiResponseInit = {}): ApiResponse {
+  static binary(
+    body: Uint8Array | ArrayBuffer,
+    init: ApiResponseInit = {},
+  ): ApiResponse {
     const bytes = body instanceof Uint8Array ? body : new Uint8Array(body);
     return new ApiResponse({
       type: "response",
       status: init.status,
-      headers: { "content-type": init.contentType ?? "application/octet-stream", ...(init.headers ?? {}) },
+      headers: {
+        "content-type": init.contentType ?? "application/octet-stream",
+        ...(init.headers ?? {}),
+      },
       bodyType: "base64",
       body: bytesToBase64(bytes),
     });

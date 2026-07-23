@@ -1,5 +1,5 @@
 import { MicroApp } from "./base.ts";
-import { ApiRequest, type ApiDecoratorConfig } from "./api.ts";
+import { type ApiDecoratorConfig, ApiRequest } from "./api.ts";
 
 /**
  * Decorator que registra um método como etapa de pré-processamento no pipeline do MicroApp.
@@ -124,7 +124,6 @@ export type AiFunctionSettings = {
   background?: boolean;
 } | null;
 
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Helper ``p`` — builders de tipo para AI function params
 // ═══════════════════════════════════════════════════════════════════════════
@@ -198,7 +197,11 @@ export const p: {
     const cleanItems = { ...items };
     delete cleanItems.optional;
     delete cleanItems._optional;
-    return _withOptional({ type: "array", items: cleanItems, __description__: description });
+    return _withOptional({
+      type: "array",
+      items: cleanItems,
+      __description__: description,
+    });
   },
 
   /**
@@ -268,10 +271,10 @@ export function aiFunction<T extends MicroApp>(
         try {
           return await target.call(obj, params);
         } catch (err) {
-          const eid = Math.round(Math.random() * 1_000_000);
+          const eid = crypto.randomUUID();
           const stack = err instanceof Error ? err.stack : undefined;
           console.log(
-            `Erro ao executar a AI function ${target.name}:\n${err}\n\n${stack}`,
+            `Erro ao executar a AI function ${target.name} (error_id=${eid}):\n${err}\n\n${stack}`,
           );
           return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`;
         }
@@ -317,16 +320,72 @@ export function exposed<T extends Function>(): any {
  * Por padrão a rota é pública; somente auth === "portal" exige autenticação do Portal no backend.
  */
 export function api<T extends Function>(config: ApiDecoratorConfig): any {
+  if (
+    config.auth !== undefined && config.auth !== "public" &&
+    config.auth !== "portal"
+  ) {
+    throw new TypeError(
+      `Auth de API invalida: ${String(config.auth)}. Use "public" ou "portal".`,
+    );
+  }
+
   return function (target: T, _context: any) {
     MicroApp.__pipeline__.api[target.name] = {
       path: config.path,
-      methods: config.methods ?? ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+      methods: config.methods ??
+        ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
       auth: config.auth === "portal" ? "portal" : undefined,
-      fn: (obj: any, params: object) => target.call(obj, ApiRequest.from(params as any)),
+      fn: (obj: any, params: object) =>
+        target.call(obj, ApiRequest.from(params as any)),
     };
 
     return target;
   };
+}
+
+function callThroughBridge(
+  instance: any,
+  functionName: string,
+  params: any,
+): Promise<any> {
+  const contextId = MicroApp.__next_call_id__();
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const release = () => {
+      if (settled) return;
+      settled = true;
+      MicroApp.__release_call_id__(contextId);
+    };
+    MicroApp.__calls__.push({
+      context_id: contextId,
+      reject: (reason) => {
+        release();
+        reject(reason);
+      },
+      resolve: (value) => {
+        release();
+        resolve(value);
+      },
+    });
+
+    try {
+      MicroApp.__bridge__.call({
+        context_id: contextId,
+        microapp_name: instance.constructor.name,
+        function_name: functionName,
+        params,
+        meta: instance.__meta__,
+      });
+    } catch (err) {
+      const index = MicroApp.__calls__.findIndex((call) =>
+        call.context_id === contextId
+      );
+      if (index !== -1) MicroApp.__calls__.splice(index, 1);
+      release();
+      reject(err);
+    }
+  });
 }
 
 /**
@@ -346,31 +405,7 @@ export function wrapperMethod(
   const functionName = String(context.name);
 
   return function (this: any, params: any) {
-    let resolve!: (value: any) => void;
-    let reject!: (reason?: any) => void;
-
-    const promise = new Promise((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
-
-    const id = Math.round(Math.random() * 1_000_000);
-
-    MicroApp.__calls__.push({
-      context_id: id,
-      reject,
-      resolve,
-    });
-
-    MicroApp.__bridge__.call({
-      context_id: id,
-      microapp_name: this.constructor.name,
-      function_name: functionName,
-      params,
-      meta: this.__meta__,
-    });
-
-    return promise;
+    return callThroughBridge(this, functionName, params);
   };
 }
 
@@ -397,31 +432,7 @@ export function wrapper<T extends { prototype: any }>(
     if (typeof original !== "function") continue;
 
     target.prototype[prop] = function (params: any) {
-      let resolve!: (value: any) => void;
-      let reject!: (reason?: any) => void;
-
-      const promise = new Promise((res, rej) => {
-        resolve = res;
-        reject = rej;
-      });
-
-      const id = Math.round(Math.random() * 1_000_000);
-
-      MicroApp.__calls__.push({
-        context_id: id,
-        reject,
-        resolve,
-      });
-
-      MicroApp.__bridge__.call({
-        context_id: id,
-        microapp_name: this.constructor.name,
-        function_name: prop,
-        params,
-        meta: this.__meta__,
-      });
-
-      return promise;
+      return callThroughBridge(this, prop, params);
     };
   }
 
