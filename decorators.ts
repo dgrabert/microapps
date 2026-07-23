@@ -2,6 +2,32 @@ import { MicroApp } from "./base.ts";
 import { type ApiDecoratorConfig, ApiRequest } from "./api.ts";
 
 /**
+ * Lê uma flag booleana de `/workspace/shared/.env` — arquivo de flags genérico
+ * compartilhado por todos os microapps do grupo. Ex.: `DEV=true`, gravado pelo
+ * microapp-maker quando o robô pode desenvolver. Best-effort: se o arquivo não
+ * existir ou o shared não estiver montado, retorna false. Considera verdadeiro
+ * `true`/`1` (case-insensitive).
+ */
+function _flagSharedEnv(chave: string): boolean {
+  try {
+    const txt = Deno.readTextFileSync("/workspace/shared/.env");
+    for (const raw of txt.split(/\r?\n/)) {
+      const linha = raw.trim();
+      if (linha === "" || linha.startsWith("#")) continue;
+      const eq = linha.indexOf("=");
+      if (eq === -1) continue;
+      if (linha.slice(0, eq).trim() !== chave) continue;
+      const val = linha.slice(eq + 1).trim().replace(/^["']|["']$/g, "")
+        .toLowerCase();
+      return val === "true" || val === "1";
+    }
+  } catch {
+    // sem /workspace/shared/.env → não é robô desenvolvedor
+  }
+  return false;
+}
+
+/**
  * Decorator que registra um método como etapa de pré-processamento no pipeline do MicroApp.
  * Métodos decorados são executados antes da IA executar AI functions e gerar a resposta. Eles ordenados pelo `tier` (prioridade).
  * @param tier - Nível de prioridade de execução no pré-processamento.
@@ -276,6 +302,13 @@ export function aiFunction<T extends MicroApp>(
           console.log(
             `Erro ao executar a AI function ${target.name} (error_id=${eid}):\n${err}\n\n${stack}`,
           );
+          // Robô "desenvolvedor" (com o microapp-maker no fluxo) sinaliza
+          // DEV=true em /workspace/shared/.env; nesse caso o LLM precisa ver o
+          // erro REAL pra corrigir o microapp, em vez do código mascarado.
+          if (_flagSharedEnv("DEV")) {
+            const msg = err instanceof Error ? err.message : String(err);
+            return `Erro ao executar a AI function ${target.name}: ${msg} (error_id=${eid})`;
+          }
           return `Erro ao executar a AI function ${target.name}. Código de erro ${eid}`;
         }
       },
